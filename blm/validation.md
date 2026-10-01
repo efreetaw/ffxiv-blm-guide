@@ -164,7 +164,5 @@
 
 ## 来源与限制
 
-- 原帖：[NGA tid=43757414](https://bbs.nga.cn/read.php?tid=43757414&rand=965)（访客访问受限）
-- 镜像：[底层逻辑](https://ff14.17173.com/content/04112025/090331341.shtml)、[特化介绍（一）](https://ff14.17173.com/content/04122025/102309155.shtml)、[特化介绍（二）](https://ff14.17173.com/content/04122025/102833648.shtml)、[AOE循环](https://ff14.17173.com/content/04122025/103313298.shtml)
-- 图片按镜像正文的原始 CDN 链接保存，排除了页面推荐位、广告和站点装饰图。
+- 原帖：[用户指定的 NGA tid=43757414](https://ngabbs.com/read.php?tid=43757414&rand=851)
 - 复核只处理技能威力与 GCD 机会成本，不处理副本时间轴、团队增益、药效、咏速和实际雷 DoT 截断。
