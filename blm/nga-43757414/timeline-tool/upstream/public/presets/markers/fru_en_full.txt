@@ -1,0 +1,1 @@
+{"fileType":"MarkerTrackSet","phasedTracks":[{"offset":0,"label":{"en":"P1"},"fileName":"fru_p1.txt"},{"offset":162.996,"label":{"en":"P2+intermission"},"fileName":"fru_p2.txt"},{"offset":440.795,"label":{"en":"P3+P4"},"fileName":"fru_p3_p4.txt"},{"offset":858.667,"label":{"en":"P5"},"fileName":"fru_p5.txt"}]}

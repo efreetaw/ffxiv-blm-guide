@@ -1,0 +1,42 @@
+{
+  "name": "两段火阶段窗口",
+  "config": {
+    "spellSpeed": 420,
+    "skillSpeed": 420,
+    "countdown": 0,
+    "fps": 60,
+    "animationLock": 0.7,
+    "randomSeed": "ledger",
+    "procMode": "Never"
+  },
+  "initialResources": {
+    "MANA": 10000,
+    "ASTRAL_FIRE": 3,
+    "UMBRAL_HEART": 3,
+    "PARADOX": 1
+  },
+  "actions": [
+    "火4×6",
+    "A",
+    "耀星",
+    "绝望",
+    "星灵移位",
+    "即刻",
+    "冰3",
+    "冰4",
+    "U",
+    "星灵移位",
+    "火3",
+    "火4×6",
+    "A",
+    "耀星",
+    "绝望"
+  ],
+  "flow": {
+    "columns": 8,
+    "pixelRatio": 2,
+    "expectedGcd": 22,
+    "title": "两段火阶段窗口｜22技能位／12156威力",
+    "subtitle": "前段常规火段9GCD ＋ 后段单体基准13GCD；每行从左到右"
+  }
+}

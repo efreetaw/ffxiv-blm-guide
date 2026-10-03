@@ -1,0 +1,64 @@
+{
+  "name": "三目标AOE基准",
+  "config": {
+    "spellSpeed": 420,
+    "skillSpeed": 420,
+    "countdown": 0,
+    "fps": 60,
+    "animationLock": 0.7,
+    "randomSeed": "ledger",
+    "procMode": "Never"
+  },
+  "initialResources": {
+    "MANA": 10000,
+    "UMBRAL_ICE": 1,
+    "PARADOX": 1
+  },
+  "actions": [
+    {
+      "type": "Skill",
+      "skillName": "Freeze",
+      "targetList": [
+        1,
+        2,
+        3
+      ]
+    },
+    "U",
+    "星灵移位",
+    {
+      "type": "Skill",
+      "skillName": "Flare",
+      "targetList": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "type": "Skill",
+      "skillName": "Flare",
+      "targetList": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "type": "Skill",
+      "skillName": "Flare Star",
+      "targetList": [
+        1,
+        2,
+        3
+      ]
+    }
+  ],
+  "flow": {
+    "columns": 8,
+    "pixelRatio": 2,
+    "expectedGcd": 5,
+    "title": "三目标AOE基准｜5技能位／4273.2威力",
+    "subtitle": "3目标：玄冰、核爆与耀星为群攻；冰悖论仍为单体"
+  }
+}

@@ -1,0 +1,58 @@
+import React, { act } from "react";
+import { render, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import Main from "../Components/Main";
+
+// Need to mock window.URL.createObjectURL
+// https://stackoverflow.com/questions/52968969/jest-url-createobjecturl-is-not-a-function
+// https://stackoverflow.com/questions/61593774/how-do-i-test-code-that-uses-requestanimationframe-in-jest
+
+// [myn] and also mock ResizeObserver
+// https://stackoverflow.com/questions/64558062/how-to-mock-resizeobserver-to-work-in-unit-tests-using-react-testing-library
+
+class ResizeObserver {
+	observe() {}
+	unobserve() {}
+	disconnect() {}
+}
+
+beforeEach(() => {
+	window.URL.createObjectURL = vi.fn();
+	window.ResizeObserver = ResizeObserver;
+});
+
+afterEach(() => {
+	vi.restoreAllMocks();
+});
+
+// Basic sanity test to ensure the webpage doesn't crash on load,
+// https://create-react-app.dev/docs/running-tests/
+it("renders without crashing", async () => {
+	const { container } = render(<Main />);
+	await act(async () => {
+		expect(container).toBeTruthy();
+	});
+});
+
+// Tests adding an ability to the timeline does not cause a crash
+// https://testing-library.com/docs/react-testing-library/example-intro
+it("allows timeline inputs without crashing", async () => {
+	const user = userEvent.setup();
+	const { container } = render(<Main />);
+	// Sprint applies instantaneously, and will show up in the damage table instantaneously
+	const skillButtonId = "skillButton-Sprint";
+
+	const skillButton = container.querySelector(`[data-tooptip-id="${skillButtonId}"]`);
+	const damageTable = container.querySelector("#damageTable");
+
+	// Before clicking Sprint, it won't show up anywhere
+	// @ts-expect-error something about vite 5.x broke type-checking on the .not here and
+	// I don't feel like fixing it
+	expect(within(damageTable as HTMLElement).queryByText("Sprint")).not.toBeInTheDocument();
+	// click a skill
+	await user.click(skillButton as HTMLElement);
+	// sz: I'm having a real bad time getting assertions involving DOM elements to work, so I
+	// will leave the testing of the webpage's responsiveness to a later date.
+	// Ideally we should assert that "Sprint" shows up in the damage table, since checking
+	// the timeline canvas is difficult.
+});

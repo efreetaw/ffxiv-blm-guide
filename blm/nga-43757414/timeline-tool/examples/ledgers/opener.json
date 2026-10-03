@@ -1,0 +1,33 @@
+{
+  "name": "起手账本",
+  "config": {
+    "spellSpeed": 420,
+    "skillSpeed": 420,
+    "countdown": 0,
+    "fps": 60,
+    "animationLock": 0.7,
+    "randomSeed": "ledger",
+    "procMode": "Never"
+  },
+  "initialResources": {
+    "MANA": 10000,
+    "ASTRAL_FIRE": 3,
+    "UMBRAL_HEART": 3
+  },
+  "actions": [
+    "火4×4",
+    "绝望",
+    "魔泉",
+    "火4×6",
+    "A",
+    "耀星",
+    "绝望"
+  ],
+  "flow": {
+    "columns": 8,
+    "pixelRatio": 2,
+    "expectedGcd": 14,
+    "title": "起手账本｜14技能位／8100威力",
+    "subtitle": "从AF3开始计量：满蓝、3根冰针；魔泉不占技能位"
+  }
+}

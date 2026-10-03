@@ -1,0 +1,191 @@
+.root {
+    /*
+    Needed for BaseUI dialogs to always appear on top
+    https://base-ui.com/react/overview/quick-start
+    */
+    isolation: isolate;
+}
+
+@font-face {
+    font-family: "Goldman Regular";
+    src: url("/fonts/Goldman/Goldman-Regular.ttf");
+}
+@font-face {
+    font-family: "Goldman Bold";
+    src: url("/fonts/Goldman/Goldman-Bold.ttf");
+}
+@font-face {
+    font-family: "XIVShell Defaults";
+    src:
+        /* windows */
+        local("Consolas"), local("Cascadia Mono"),
+        /* apple */
+        local("Menlo"), local("Monaco"),
+        /* linux hopefully */
+        local("DejaVu Sans Mono"), local("Liberation Mono"), local("Ubuntu Mono");
+}
+
+/*======== sections ========*/
+
+/* Stats display */
+
+.buff {
+    text-align: center;
+    width: 54px;
+    display: inline-block;
+}
+.buff.hidden {
+    display: none;
+}
+.buff>img {
+    display: inline-block;
+    height: 40px;
+    vertical-align: top;
+}
+
+/* Skills window */
+
+.skillsWindow {
+    line-height: 1;
+}
+.skillInfoText {
+    margin-bottom: 10px;
+}
+.skillButton {
+    display: inline-block;
+    user-select: none;
+    position: relative;
+}
+
+/* Danger button */
+.dangerButton {
+    color: #be0f0f;
+    border: 1px solid #be0f0f;
+    background: transparent;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dangerButton:hover {
+    color: #ffffff;
+    background: #be0f0f;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 12px rgba(190, 15, 15, 0.4);
+}
+
+.importPage {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.importPage > hr {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.importPage > ul {
+    margin-block-start: 0;
+    margin-block-end: 0;
+}
+
+.importPage > ul > li + li {
+    margin-top: 5px;
+}
+
+/*======== individual elems ========*/
+
+.clickable {
+    display: inline-block;
+}
+.clickable:hover {
+    cursor: pointer;
+}
+
+.clickableLinkLike {
+    display: inline-block;
+}
+
+.clickableLinkLike:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.paragraph {
+    margin: 10px 0;
+}
+
+.shellCheckbox {
+    position: relative;
+    top: 3;
+    margin-right: 0.25em
+}
+
+/*
+copied when migrating from react-tooltip to baseui
+https://github.com/ReactTooltip/react-tooltip/blob/master/src/components/Tooltip/styles.module.css
+*/
+.tooltip {
+    padding: 8px 16px;
+    border-radius: 3px;
+    font-size: 90%;
+    width: max-content;
+}
+
+.tooltip-positioner {
+    z-index: 10;
+}
+
+.dialogExit {
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+    cursor: pointer;
+    font-size: 1.5rem;
+}
+
+/* Partially copied from BaseUI's Dialog example https://base-ui.com/react/components/dialog */
+.Backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: black;
+  transition: opacity 50ms cubic-bezier(0.45, 1.005, 0, 1.005);
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+  }
+}
+
+.Popup {
+  box-sizing: border-box;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50vw;
+  height: 70vh;
+  max-height: 70vh;
+  overflow-y: scroll;
+  margin-top: -2rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  transition: all 50ms cubic-bezier(0.45, 1.005, 0, 1.005);
+  /* keep consistent with DEFAULT_FONTS in Common.tsx */
+  font-family: "XIVShell Defaults", "微软雅黑", sans-serif;
+  font-size: 13px;
+
+  &[data-starting-style],
+  &[data-ending-style] {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+}
+
+/* Keeps a <th> element fixed in place relative to the table. */
+th.stickyTh {
+    position: sticky;
+    top: -1px;
+    z-index: 2;
+}

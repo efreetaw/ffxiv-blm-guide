@@ -1,0 +1,5 @@
+*.log
+*.pid
+upstream/build/
+upstream/node_modules/
+upstream/tsconfig.tsbuildinfo

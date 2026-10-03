@@ -1,0 +1,633 @@
+import React, { CSSProperties } from "react";
+import { clearCachedValues, isBetaSite } from "../Controller/Common";
+import { Expandable, Help, ButtonIndicator } from "./Common";
+import { localize } from "./Localization";
+import { Changelog } from "./Changelog";
+import { getCurrentThemeColors } from "./ColorTheme";
+import { ShellJob } from "../Game/Data/Jobs";
+
+const THIS_DOMAIN = isBetaSite ? "https://beta.xivintheshell.com" : "https://xivintheshell.com";
+
+export const GITHUB_URL = "https://github.com/xivintheshell/xivintheshell";
+export const BSKY_URL = "https://bsky.app/profile/xivintheshell.com";
+export const BLOG_URL = "https://blog.xivintheshell.com";
+
+// #xiv_in_the_shell_support in the Balance discord
+export const HELP_CHANNEL_URL =
+	"https://discord.com/channels/277897135515762698/1307922201726685236";
+
+export const HELP_QQ_GROUP = "913451994";
+
+const BALANCE_URL = "https://discord.gg/thebalanceffxiv";
+
+// needs to be a function to evaluate localization
+const getAcknowledgements = () => <>
+	<div className="paragraph">
+		{localize({
+			en: <>
+				<span>This tool was initially Black Mage in the Shell, </span>
+				<span>
+					ideated by <b>Eshiya (Galahad)</b> and developed by <b>miyehn</b> specifically
+					for BLM during Endwalker since around February 2022.{" "}
+				</span>
+				<span>
+					After Dawntrail's release, it was expanded to support other jobs and is now
+					maintained by a small team of developers:
+				</span>
+			</>,
+			zh: <>
+				<span>
+					本工具起初是由加拉哈德构想、由miyehn开发的黑魔排轴器，于2022年2月开工，陪黑魔们走过了大半段6.x时期。
+				</span>
+				<span>
+					7.0发售后，它被重构并逐渐开始支持更多职业，现在的排轴器由多名开发共同维护：
+				</span>
+			</>,
+		})}
+	</div>
+	{localize({
+		en: <ul>
+			<li>
+				Tool design and core systems: <b>shanzhe</b>, <b>miyehn</b>, <b>Turtle</b>,{" "}
+				<b>Akairyu</b>
+			</li>
+			<li>
+				BLM: <b>shanzhe</b>, <b>Akairyu</b>, <b>Turtle</b>, <b>miyehn</b>
+			</li>
+			<li>
+				PCT, RDM, SMN, DRK, NIN, MNK, WHM, AST, SCH: <b>shanzhe</b>
+			</li>
+			<li>
+				SAM: <b>Sterling</b>, <b>shanzhe</b>
+			</li>
+			<li>
+				DNC, MCH, BRD, SGE: <b>Akairyu</b>
+			</li>
+			<li>
+				RPR: <b>Honey B. Lovely's Favorite Bee</b>
+			</li>
+			<li>
+				WAR: <b>misterperson</b>
+			</li>
+			<li>
+				GNB, DRG, PLD: <b>Sterling</b>
+			</li>
+			<li>
+				BLU: <b>小铅笔</b>
+			</li>
+			<li>
+				VPR: <b>shanzhe</b>, <b>misterperson</b>
+			</li>
+			<li>
+				Framework for adding new jobs: <b>shanzhe</b>
+			</li>
+			<li>
+				Chinese localization: <b>miyehn</b>, <b>Eshiya</b>, <b>Yuyuka</b>, <b>shanzhe</b>,{" "}
+				<b>小盐</b>, <b>卿落青</b>, <b>久逺</b>, <b>大猫</b>, <b>洛洛可</b>, <b>青木柒</b>
+			</li>
+		</ul>,
+		zh: <ul>
+			<li>
+				工具设计和核心系统：<b>shanzhe</b>、<b>miyehn</b>、<b>Turtle</b>、<b>Akairyu</b>
+			</li>
+			<li>
+				黑魔：<b>shanzhe</b>、<b>Akairyu</b>、<b>Turtle</b>、<b>miyehn</b>
+			</li>
+			<li>
+				绘灵魔、赤魔、召唤、暗黑骑士、忍者、武僧、白魔、占星术士、学者：<b>shanzhe</b>
+			</li>
+			<li>
+				武士：<b>Sterling</b>、<b>shanzhe</b>
+			</li>
+			<li>
+				舞者、机工、吟游诗人、贤者：<b>Akairyu</b>
+			</li>
+			<li>
+				钐镰客：<b>Honey B. Lovely's Favorite Bee</b>
+			</li>
+			<li>
+				战士：<b>misterperson</b>
+			</li>
+			<li>
+				绝枪战士、龙骑士、骑士：<b>Sterling</b>
+			</li>
+			<li>
+				青魔：<b>小铅笔</b>
+			</li>
+			<li>
+				蝰蛇剑士：<b>shanzhe</b>、<b>misterperson</b>
+			</li>
+			<li>
+				添加新职业的程序框架：<b>shanzhe</b>
+			</li>
+			<li>
+				中文本地化：<b>miyehn</b>、<b>加拉哈德</b>、<b>鱼卡</b>、<b>shanzhe</b>、<b>小盐</b>
+				、<b>卿落青</b>、<b>久逺</b>、<b>大猫</b>、<b>洛洛可</b>、<b>青木柒</b>
+			</li>
+		</ul>,
+	})}
+	<div className="paragraph">
+		{localize({
+			en:
+				"And many thanks to Yara, Spider, Santa, players in 不打冰三攻略组, kiyozero, czmm, " +
+				"and other players and groups who contributed feature suggestions, timeline markers, bug reports, etc.",
+			zh: "同时，感谢Yara、Spider、Santa、不打冰三攻略组成员、kiyozero、czmm等，以体验反馈、报bug、时间轴标记等形式为这个工具作出过无私贡献的玩家们。",
+		})}
+	</div>
+
+	{localize({
+		en: <div className={"paragraph"}>
+			If you have questions or would like to provide feedback, you can message in{" "}
+			<a target={"_blank"} href={HELP_CHANNEL_URL} rel="noreferrer">
+				this channel in The Balance
+			</a>{" "}
+			(requires the "Misc. Support" role), or join QQ group {HELP_QQ_GROUP} where you can use
+			Chinese. In case of sending a bug report, attaching the fight record (download
+			"fight.txt" from the bottom or name it anything else) would be very helpful.
+		</div>,
+		zh: <div className={"paragraph"}>
+			<span>
+				如果遇到bug或者有任何工具相关的问题和建议，都欢迎反馈给我们，反馈QQ群号:{" "}
+				{HELP_QQ_GROUP}。也可到 Discord The Balance 服务器的
+				<a target={"_blank"} href={HELP_CHANNEL_URL} rel="noreferrer">
+					此频道
+				</a>
+				用英文反馈（需要有 "Misc. Support" role 才能看到此频道）。
+			</span>
+			<span>
+				如果是反馈bug，最好把能够复现bug的战斗记录文件（从下方下载的fight.txt）一起发过来。
+			</span>
+		</div>,
+		ja: <div className={"paragraph"}>
+			[outdated (ja)]
+			質問、バグ報告、機能提案などがある場合は、Discord（miyehn）またはメール（ellyn.waterford@gmail.com）でお問い合わせください。
+			バグ報告の場合は、右側からダウンロードした「fight.txt」を添付していただくと助かります。
+		</div>,
+	})}
+</>;
+
+export function IntroSection(props: { job: ShellJob }) {
+	const smallGap: CSSProperties = { marginBottom: 5 };
+	const colors = getCurrentThemeColors();
+	const job = props.job;
+	const bi = (k: string) => <ButtonIndicator text={k} />;
+	const modifierKey = bi(navigator.platform.includes("Mac") ? "cmd" : "ctrl");
+	return <div>
+		<Changelog />
+		<Expandable
+			defaultShow={true}
+			title={"instructions"}
+			titleNode={
+				<span>
+					{localize({ en: "Instructions ", zh: "使用说明 ", ja: "説明 " })}
+					<Help
+						topic={"expandable"}
+						content={localize({
+							en: "click me to expand or collapse",
+							zh: "点击展开/折叠",
+							ja: "クリックして開閉する",
+						})}
+					/>
+				</span>
+			}
+			content={
+				<div>
+					<div className="paragraph">
+						<b>{localize({ en: "General Usage", zh: "基本用法", ja: "使い方" })}</b>
+					</div>
+					{localize({
+						en: <ul>
+							<li style={smallGap}>
+								Set your stats in <b>Config</b> on the right, then{" "}
+								{bi("apply and reset")}.
+							</li>
+							<li style={smallGap}>
+								Click on a skill to use it at the selected point in the timeline.
+								The simulation will always jump to when the last animation lock ends
+								and the skill's cooldown becomes available.
+							</li>
+							<li style={smallGap}>
+								Press {bi("u")} to delete the last added action (effective when not
+								running in real-time). Use {modifierKey}+{bi("z")}
+								and {modifierKey}+{bi("y")} to undo/redo.
+							</li>
+							<li style={smallGap}>
+								Click on a buff applied to self to remove it. Clicking on certain
+								ground-targeted buffs like BLM's Ley Lines, DRK's Salt and Darkness,
+								and SCH's Sacred Soil temporarily disables their effects. Clicking
+								again re-enables them.
+							</li>
+							<li style={smallGap}>
+								Click and drag in the visual timeline or use the "Timeline Editor"
+								tab at the bottom of the page to re-arrange skills.
+							</li>
+						</ul>,
+						zh: <ul>
+							<li style={smallGap}>
+								在右边<b>属性设置</b>里输入装备数据，然后点击{" "}
+								{bi("应用并重置时间轴")} 。
+							</li>
+							<li style={smallGap}>
+								单击使用技能，如果CD还没转好，会自动等到转好然后重试。
+							</li>
+							<li style={smallGap}>
+								按 {bi("u")} 删除最后一个技能（实时模式下此操作无效）。按{" "}
+								{modifierKey}+{bi("z")} 或 {modifierKey}+{bi("y")} 可撤销或重做。
+							</li>
+							<li style={smallGap}>
+								左键单击可以移除自己身上的buff。地面区域类的buff，像“黑魔纹”（如暗黑骑士的”腐秽大地“和学者的”野战治疗阵“），在单击关闭后可以被再次点击开启。
+							</li>
+							<li style={smallGap}>
+								在时间轴可视化窗口和下方的“时间轴编辑器“内，可以通过拖动选中技能以改变技能顺序。
+							</li>
+						</ul>,
+						ja: <ul>
+							<li style={smallGap}>
+								右側にある<b>設定</b>でステータスをセットしてから
+								<ButtonIndicator text={"適用とリセット"} />
+								をクリックしてください。
+							</li>
+							{/* TODO: outdated */}
+							<li style={smallGap}>
+								実行したいアクションをクリックしてください。リキャストが戻ってきていないアクションをクリックすると使用可能な時間まで待って再実行します。
+							</li>
+							<li style={smallGap}>
+								<ButtonIndicator text={"u"} />
+								を押すと最後に追加されたアクションを削除できます。
+							</li>
+							<li style={smallGap}>
+								黒魔紋以外のバフをクリックすると削除できます。黒魔紋はバフの有効無効を切り替えられます。
+							</li>
+						</ul>,
+					})}
+					<div className="paragraph">
+						<b>{localize({ en: "Timeline", zh: "时间轴", ja: "タイムライン" })}</b>
+					</div>
+					{localize({
+						en: <ul>
+							<li style={smallGap}>
+								Holding {bi("shift")} lets you scroll horizontally.
+							</li>
+							<li style={smallGap}>
+								Click to select/unselect a single skill on the timeline.{" "}
+								{bi("shift")}+click or click/drag to select a sequence of skills.
+							</li>
+							<li style={smallGap}>
+								Use {bi("backspace")} or {bi("delete")} to delete the selected
+								skill(s).
+							</li>
+							<li style={smallGap}>
+								Use {modifierKey}+{bi("c")} and {modifierKey}+{bi("v")} to
+								copy/paste skills.
+							</li>
+							<li style={smallGap}>
+								Click on the timeline's ruler-like header to view historical game
+								states. Click on somewhere else on the timeline to return to the
+								most recent game state.
+							</li>
+						</ul>,
+						zh: <ul>
+							<li style={smallGap}>
+								按住 {bi("shift")} 时滑动鼠标滚轮可以横向滚动时间线。
+							</li>
+							<li style={smallGap}>
+								单击选中时间轴上的单个技能，再次单击取消选中。在时间轴上框选，或在选中一个技能时按住
+								shift 点击另一个技能，会选中期间的所有操作。 {bi("shift")}{" "}
+								点击另一个技能，会选中期间的所有操作。
+							</li>
+							<li style={smallGap}>
+								按 {bi("backspace")} 或 {bi("delete")} 删除选中技能。
+							</li>
+							<li style={smallGap}>
+								按 {modifierKey}+{bi("c")} 或 {modifierKey}+{bi("v")}{" "}
+								复制或粘贴技能。
+							</li>
+							<li style={smallGap}>
+								选中某技能或者刻度上的某时间时，可以看到相应时间的职业资源状态。点击时间轴空白处取消，并回到最新的资源状态。
+							</li>
+						</ul>,
+						ja: <ul>
+							<li style={smallGap}>
+								<ButtonIndicator text={"shift"} />
+								を押しながらスクロールすると横スクロールできます。
+							</li>
+							{/* TODO outdated */}
+							<li style={smallGap}>
+								タイムライン上のアクションをクリックすると選択できます。
+								<ButtonIndicator text={"shift"} />
+								を押しながらクリックすると複数選択できます。
+							</li>
+							<li style={smallGap}>
+								<ButtonIndicator text={"backspace"} />か
+								<ButtonIndicator text={"delete"} />
+								を押すと選択中のアクションとそれ以降のアクションを全て削除します。
+							</li>
+							<li style={smallGap}>
+								タイムラインの経過時間が表示されているヘッダー部分をクリックするとメインコントロールの枠が
+								<b style={{ color: "darkorange" }}>オレンジ</b>
+								になり、その瞬間の状態を確認できます。
+								その間はアクションを実行できません。他の場所をクリックするとキャンセルされ通常モードに戻ります。
+							</li>
+						</ul>,
+					})}
+
+					{localize({
+						en: <div className={"paragraph"}>
+							<span style={{ color: colors.fileDownload, cursor: "pointer" }}>
+								<u>[these]</u>
+							</span>{" "}
+							are file download links. Click to download, or right click to choose
+							save location.
+						</div>,
+						zh: <div className={"paragraph"}>
+							<span style={{ color: colors.fileDownload, cursor: "pointer" }}>
+								<u>[这样的按钮]</u>
+							</span>{" "}
+							是文件下载链接，可以点击直接下载也可以右键另存为。
+						</div>,
+						ja: <div className={"paragraph"}>
+							<span style={{ color: colors.fileDownload, cursor: "pointer" }}>
+								<u>[このように表示されている部分]</u>
+							</span>
+							はダウンロードリンクです。クリックしてダウンロードするか右クリックで場所を指定してダウンロードできます。
+						</div>,
+					})}
+
+					{localize({
+						en: <div className="paragraph">
+							You can save/load fight records at the bottom, under the{" "}
+							<b>Import/Export</b> tab. Most edits are also automatically saved in
+							your browser cache, so it's generally okay to refresh the page and not
+							worry about losing progress.
+						</div>,
+						zh: <div className="paragraph">
+							工具最下方的 <b>导入/导出</b>{" "}
+							区域有链接可以保存/加载战斗记录。大部分编辑也都会被保存在浏览器缓存，所以一般情况下刷新网页也不会丢失数据。
+						</div>,
+						//ja: <div className="paragraph">[outdated (ja)] 右側の最下部からデータのセーブとロードができます。ほとんどの編集内容はブラウザのキャッシュにも保存されるためページをリロードをしても失われることはありません。</div>,
+					})}
+
+					{localize({
+						en: <div className="paragraph">
+							Hover over <Help topic={"sampleTips"} content={"sample tip"} />{" "}
+							everywhere to see more tips.
+						</div>,
+						zh: <div className="paragraph">
+							鼠标悬浮在各处的 <Help topic={"sampleTips"} content={"我是一个说明"} />{" "}
+							上查看更多使用说明。
+						</div>,
+						ja: <div className="paragraph">
+							<Help topic={"sampleTips"} content={"サンプルのヘルプテキストです"} />
+							をホバーするとヘルプテキストを確認できます。
+						</div>,
+					})}
+					{localize({
+						en: <div className="paragraph">
+							For more detailed instructions, please refer to our{" "}
+							<a href="/manual">user manual</a>.
+						</div>,
+						zh: <div className="paragraph">
+							如需更详细的说明，请参考我们的<a href="/manual">使用手册</a>。
+						</div>,
+					})}
+					<div className="paragraph" style={{ marginTop: 16 }}>
+						<Expandable
+							title={"Troubleshoot"}
+							titleNode={localize({
+								en: <b>troubleshoot</b>,
+								zh: <b>常见问题</b>,
+								ja: <b>トラブルシューティング</b>,
+							})}
+							content={
+								<>
+									{localize({
+										en: <div>
+											<div className="paragraph">
+												I can't guarantee that my updates are always
+												backward compatible. If your fight record files
+												aren't loading properly but you don't understand
+												why, contact me and I'll try my best to help.
+											</div>
+											<div className="paragraph">
+												If the browser cache is somehow messed up (likely
+												due to invalid game states), this is how to reset
+												it:
+												<br />
+												Enter this tool from{" "}
+												<b>{THIS_DOMAIN + "?{command}"}</b> replacing{" "}
+												<b>{"{command}"}</b> with one of the following:
+												<ul>
+													<li style={smallGap}>
+														<b>resetResourceOverrides</b>: delete all
+														resource overrides and all actions on the
+														current timeline.
+													</li>
+													<li style={smallGap}>
+														<b>resetAll</b>: delete all browser-cached
+														settings.
+													</li>
+												</ul>
+											</div>
+										</div>,
+										zh: <div>
+											<div className="paragraph">
+												我无法保证每次更新都能兼容已有的战斗记录文件。如果你的战斗记录无法被正常导入但你不清楚原因，可以联系我，我会尽力帮一起看。
+											</div>
+											<div className="paragraph">
+												如果浏览器缓存因不明原因出问题（比如预设了刚打完绝望满蓝这样的“非法状态”），可尝试用以下方法重置浏览器缓存：
+												<br />
+												用以下链接进入本工具：
+												<b>{THIS_DOMAIN + "?{command}"}</b>，然后把
+												<b>{"{command}"}</b>替换成以下两个指令之一：
+												<ul>
+													<li style={smallGap}>
+														<b>resetResourceOverrides</b>:
+														删除当前时间线上的所有资源预设和技能
+													</li>
+													<li style={smallGap}>
+														<b>resetAll</b>:
+														删除所有本工具相关的浏览器缓存
+													</li>
+												</ul>
+											</div>
+										</div>,
+										ja: <div>
+											<div className="paragraph">
+												後方互換性があるとは限りません。保存したファイルが正しく読み込まれず、その理由がわからない場合はお問い合わせください。できる限りお手伝いします。
+											</div>
+											<div className="paragraph">
+												ブラウザのキャッシュが何らかの理由で壊れている場合、次の方法でリセットできます。
+												<br />
+												<b>{THIS_DOMAIN + "?{command}"}</b> にアクセスし、
+												<b>{"{command}"}</b>{" "}
+												を以下のいずれかに置き換えます：
+												<ul>
+													<li style={smallGap}>
+														<b>resetResourceOverrides</b>:
+														全てのリソースとタイムライン上のアクションを上書きします。
+													</li>
+													<li style={smallGap}>
+														<b>resetAll</b>:
+														全てのブラウザキャッシュを削除します。
+													</li>
+												</ul>
+											</div>
+										</div>,
+									})}
+									<div>
+										{localize({ en: "Or just: ", zh: "或者直接：" })}
+										<button
+											className="dangerButton"
+											onClick={() => {
+												clearCachedValues();
+												window.location.reload();
+											}}
+										>
+											{localize({
+												en: "[DANGER!] clear browser cache and reload",
+												zh: "[谨慎操作] 清除缓存并刷新",
+												ja: "[キケン！] ブラウザキャッシュをクリアしてリロード",
+											})}
+										</button>
+									</div>
+								</>
+							}
+						/>
+					</div>
+				</div>
+			}
+		/>
+		<Expandable
+			defaultShow={false}
+			title={"About this tool"}
+			titleNode={localize({ en: "About this tool", zh: "关于", ja: "このツールについて" })}
+			content={
+				<div>
+					<div className="paragraph">
+						{localize({
+							en: "This is a FFXIV simulator & rotation planner.",
+							zh: "是个FF14模拟器/排轴工具。",
+							ja: "FF14のスキルローテーションシミュレーターです。",
+						})}
+					</div>
+					{getAcknowledgements()}
+					<div className="paragraph">
+						{localize({ en: "Some links:", zh: "一些链接：", ja: "リンク集" })}
+					</div>
+					{localize({
+						en: <ul>
+							<li>
+								<a href={GITHUB_URL}>Github repository</a>
+							</li>
+							<li>
+								<a href={BSKY_URL}>Bluesky account</a> and our{" "}
+								<a href={BLOG_URL}>developer blog</a>
+							</li>
+							<li>
+								<a href={"https://xivintheshell.github.io/legacy/"}>
+									XIV in the Shell (Legacy)
+								</a>
+								: a snapshot of this tool at the end of the previous major game
+								patch (currently 7.25).
+							</li>
+							<li>
+								<a href={"https://miyehn.me/ffxiv-blm-rotation-endwalker/"}>
+									Black Mage in the Shell (Endwalker)
+								</a>
+								: a snapshot of this tool at the end of Endwalker. It also contains
+								some notable fight plans from Endwalker, as memoir.
+							</li>
+							<li>
+								<a href={"https://spide-r.github.io/ffxiv-blm-rotation/"}>
+									Black Mage in the Bozjan Shell
+								</a>
+								: a variation for Save the Queens areas, created by{" "}
+								<b>A'zhek Silvaire @ Zalera</b>
+							</li>
+							<li>
+								<a href={"https://na.finalfantasyxiv.com/jobguide/battle/"}>
+									Official FFXIV job guides
+								</a>
+							</li>
+							<li>
+								The Balance's community{" "}
+								<a href={"https://www.thebalanceffxiv.com/"}>job guides</a> and{" "}
+								<a href={BALANCE_URL}>Discord</a>
+							</li>
+						</ul>,
+						zh: <ul>
+							<li>
+								<a href={GITHUB_URL}>Github页面</a>
+							</li>
+							<li>
+								<a href={BSKY_URL}>蓝天页面</a>和我们的
+								<a href={BLOG_URL}>开发博客</a>（英文）
+							</li>
+							<li>
+								<a href={"https://xivintheshell.github.io/legacy/"}>遗留版排轴器</a>
+								，最近的过去版本FF14排轴器（现在用7.25版本）。
+							</li>
+							<li>
+								<a href={"https://miyehn.me/ffxiv-blm-rotation-endwalker/"}>
+									6.x版排轴器
+								</a>
+								，历史版本黑魔排轴器。那里也公开展示着一些6.x时期的轴作为纪念。
+							</li>
+							<li>
+								<a href={"https://spide-r.github.io/ffxiv-blm-rotation/"}>
+									博兹雅版排轴器（Black Mage in the Bozjan Shell）
+								</a>
+								: 本工具的博兹雅/天佑女王版。制作者：{" "}
+								<b>A'zhek Silvaire @ Zalera</b>
+							</li>
+							<li>
+								<a href={"https://na.finalfantasyxiv.com/jobguide/battle/"}>
+									官方各职业介绍（英文）
+								</a>
+							</li>
+							<li>
+								The Balance
+								<a href={"https://www.thebalanceffxiv.com/"}>
+									{" "}
+									玩家社区攻略（英文）
+								</a>
+								和 <a href={BALANCE_URL}>Discord服务器</a>
+							</li>
+						</ul>,
+						ja: <ul>
+							{
+								/*[outdated (ja)]*/ <>
+									<li>
+										<a href={GITHUB_URL}>Github repository</a>
+									</li>
+									<li>
+										<a href={"https://spide-r.github.io/ffxiv-blm-rotation/"}>
+											Black Mage in the Bozjan Shell
+										</a>
+										: 南方ボズヤ戦線向けのツール。作者：
+										<b>A'zhek Silvaire @ Zalera</b>
+									</li>
+									<li>
+										<a
+											href={
+												"https://na.finalfantasyxiv.com/jobguide/blackmage/"
+											}
+										>
+											Official FFXIV black mage job guide
+										</a>
+									</li>
+									<li>
+										<a target={"_blank"} href={BALANCE_URL} rel="noreferrer">
+											{job} resources channel on The Balance
+										</a>{" "}
+										（ぜひDiscordサーバーに参加してください。）{" "}
+									</li>
+								</>
+							}
+						</ul>,
+					})}
+				</div>
+			}
+		/>
+	</div>;
+}
