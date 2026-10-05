@@ -1,5 +1,5 @@
 {
-  "name": "两段火阶段窗口",
+  "name": "火段组合循环",
   "config": {
     "spellSpeed": 420,
     "skillSpeed": 420,
@@ -36,7 +36,7 @@
     "columns": 8,
     "pixelRatio": 2,
     "expectedGcd": 22,
-    "title": "两段火阶段窗口｜22技能位／12156威力",
+    "title": "火段组合循环｜22技能位／12156威力",
     "subtitle": "前段常规火段9GCD ＋ 后段单体基准13GCD；每行从左到右"
   }
 }

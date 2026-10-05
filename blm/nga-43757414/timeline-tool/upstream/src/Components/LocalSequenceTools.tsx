@@ -221,7 +221,7 @@ async function exportFlow(options: FlowOptions = {}) {
 		}
 	});
 	ctx.textAlign = "left"; ctx.fillStyle = "#60758b"; ctx.font = '12px "Microsoft YaHei", sans-serif';
-	ctx.fillText("状态标签表示该技能施放前的AF / UI；能力技不计入账本技能位。", margin, height - 20);
+	ctx.fillText("状态标签表示该技能施放前的AF / UI；能力技不计入循环技能位。", margin, height - 20);
 	return { dataUrl: canvas.toDataURL("image/png"), width: canvas.width, height: canvas.height, gcdCount, steps };
 }
 

@@ -1,5 +1,5 @@
 {
-  "name": "起手账本",
+  "name": "起手循环",
   "config": {
     "spellSpeed": 420,
     "skillSpeed": 420,
@@ -27,7 +27,7 @@
     "columns": 8,
     "pixelRatio": 2,
     "expectedGcd": 14,
-    "title": "起手账本｜14技能位／8100威力",
+    "title": "起手循环｜14技能位／8100威力",
     "subtitle": "从AF3开始计量：满蓝、3根冰针；魔泉不占技能位"
   }
 }

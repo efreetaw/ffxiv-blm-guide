@@ -1,5 +1,5 @@
 {
-  "name": "两段火阶段窗口",
+  "name": "火段组合循环",
   "fileType": "Record",
   "config": {
     "job": "BLM",
