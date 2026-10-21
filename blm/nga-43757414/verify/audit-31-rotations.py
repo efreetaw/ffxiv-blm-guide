@@ -1,6 +1,6 @@
 """Recalculate the guide's 31 rotations using exact rational arithmetic.
 
-Run: python blm/nga-43757414/audit-31-rotations.py
+Run: python blm/nga-43757414/verify/audit-31-rotations.py
 Inputs below are manual transcriptions of the original diagrams, not values
 parsed from the annotations. Output: 31个特化循环-数值核查.html.
 This is a static potency ledger, not a rotation simulator.
@@ -11,7 +11,8 @@ from html import escape as esc
 from pathlib import Path
 from urllib.parse import quote
 
-ROOT = Path(__file__).resolve().parent
+VERIFY_DIR = Path(__file__).resolve().parent
+ROOT = VERIFY_DIR.parent
 GUIDE = "7.2黑魔进阶攻略-原文注释版.html"
 POTENCY = {
     "F4": F(300) * F("1.8"), "A": F(540), "U": F(540),
@@ -205,13 +206,13 @@ def image_links(items):
         files = list((ROOT / "images").glob(pattern))
         assert len(files) == 1, pattern
         label = f"图{item}" if isinstance(item, int) else item.replace("extra-", "附件")
-        links.append(f'<a href="{quote("images/" + files[0].name)}">{esc(label)}</a>')
+        links.append(f'<a href="{quote("../images/" + files[0].name)}">{esc(label)}</a>')
     return " · ".join(links)
 
 
 table = []
 for r in rows:
-    link = quote(GUIDE) + f'#section-{r["section"]}'
+    link = quote("../" + GUIDE) + f'#section-{r["section"]}'
     detail = "".join(f"<p>{esc(d)}</p>" for d in r["details"])
     table.append(f'''<tr class="{r['status']}"><td>{r['no']}</td>
 <td><a href="{link}">{esc(r['name'])}</a></td><td>{esc(r['original'])}</td>
@@ -244,16 +245,15 @@ details{margin-top:8px;font-size:14px}summary{cursor:pointer;color:#2456a6}detai
 元素倍率、AOE衰减及技能规则对照<a href="https://na.finalfantasyxiv.com/jobguide/blackmage/">官方黑魔职业指南</a>。
 使用火4 540、悖论540、绝望630、耀星900、AF1／AF3核爆336／432，均未乘天语。</p></div>
 <div class="scroll"><table><thead><tr><th>序</th><th>循环</th><th>原文p</th><th>复算p</th><th>结论</th><th>说明</th></tr></thead><tbody>''' + "\n".join(table) + '''</tbody></table></div>
-<h2>注释公式的三处统一建议</h2>
-<p>图29与图31的舍入说明应统一使用差额式。先把Q₂取672，少U的差额是672−540＝132；先把Q₃取854.6，差额是854.6−540＝314.6。
-注释中的132.6和314.8来自另一种绝对式，不能作为差额式的舍入结果。</p>
-<p>图35正文的Δt÷2.5应写为Δt÷g，其中g是与Δt同一加速条件下的实际GCD。原文后面的修正提示已说明这一点，正文也应与之统一。</p>
+<h2>AOE计算口径</h2>
+<p>图29与图31按差额式计算。完整精度结果分别为132.12和314.64；先把Q₂取672，少U的差额为132；先把Q₃取854.6，差额为314.6。</p>
+<p>图35的额外时间按Δt÷g折算，g为与Δt同一加速条件下的实际GCD。三连或即刻覆盖HF2时，Δt＝0。</p>
 <h2>进火蓝量</h2><p>文档中的10行门槛全部算术吻合。这是进入对应火段所需的最低MP；冰段能否在相应时间内回到这个数，还取决于醒梦跳点与填充安排。带火3的路线按火苗免耗蓝。</p>
 <div class="scroll"><table><thead><tr><th>结构</th><th>最低MP</th><th>算式</th><th>结论</th></tr></thead><tbody>''' + mana_table + '''</tbody></table></div>
 <p class="muted">缩写：F4火4，F3火3（默认AF1），B3冰3（默认UI1），B4冰4，A火悖论，U冰悖论，D绝望，Fl1／Fl3为AF1／AF3核爆，FS耀星。
 “需补条件”各行的计算与配图可展开查看。复算脚本：<a href="audit-31-rotations.py">audit-31-rotations.py</a>。</p></main></html>'''
 
-output = ROOT / "31个特化循环-数值核查.html"
+output = VERIFY_DIR / "31个特化循环-数值核查.html"
 output.write_text(page, encoding="utf-8")
 for r in rows:
     print(f"{r['no']:2} {r['name']}: {r['original']} -> {r['result']} [{r['status']}]")
