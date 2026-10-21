@@ -1,0 +1,155 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>31个特化循环 · 数值核查</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f5f6f8;color:#202830;font:16px/1.65 system-ui,"Microsoft YaHei",sans-serif}
+main{max-width:1440px;margin:auto;padding:36px 28px 60px}h1{font-size:30px;margin:0 0 10px}h2{font-size:22px;margin-top:30px}
+a{color:#2456a6;text-underline-offset:3px}.intro{max-width:1050px}.summary{padding:14px 18px;background:white;border-left:4px solid #2456a6}
+.scroll{overflow-x:auto;background:white;border:1px solid #dce1e6;border-radius:8px}table{width:100%;border-collapse:collapse;min-width:880px}
+th,td{padding:12px 14px;border-bottom:1px solid #e6e9ed;vertical-align:top;text-align:left}th{background:#edf1f6;font-size:14px}
+td:nth-child(1){width:45px}td:nth-child(2){min-width:225px}td:nth-child(3),td:nth-child(5){white-space:nowrap}
+td:nth-child(4){min-width:130px}.需补条件 td:nth-child(5){color:#9a4c06}.末位差异 td:nth-child(5){color:#725c22}
+details{margin-top:8px;font-size:14px}summary{cursor:pointer;color:#2456a6}details p{margin:8px 0}.muted{color:#576674;font-size:14px}
+@media(max-width:700px){main{padding:22px 14px}h1{font-size:25px}}@media print{body{background:white}main{padding:0}details{display:block}}
+</style><main><h1>31个特化循环 · 数值核查</h1>
+<p class="muted">2026-10-21 · 7.2威力口径 · 原图逐项计数，分数运算保留完整精度</p>
+<div class="intro"><p class="summary"><strong>20项数值吻合，2项存在末位差异，5项需要补足图示或比较条件；另4项原帖没有固定p，按条件公式核查。</strong></p>
+<p>收益按 <strong>p＝（目标总威力−参照总威力）−Q×（目标GCD数−参照GCD数）</strong> 计算。
+单体Q＝6846÷13＝526.615384…；双目标Q₂＝672.12，三目标Q₃＝854.64。表内显示最多三位小数，运算过程不提前舍入。</p>
+<p>起手与魔泉结构沿用注释版的对应参照：起手14GCD／8100，常规火段9GCD／5310，火段＋基准22GCD／12156。
+这些参照自身的S−QG不为0，所以需比较双方差额。雷、异言、秽浊只有在两边次数、有效伤害和占用GCD相同时才抵消。
+本表核查静态威力，不含天语、团辅和药；瞬发资源、火苗及蓝量仍须满足。</p>
+<p>主要威力和7.2改动核对自<a href="https://na.finalfantasyxiv.com/lodestone/topics/detail/3c4910f373e497acd3428c37f6358e341e4cc06d/">官方7.2补丁说明</a>；
+元素倍率、AOE衰减及技能规则对照<a href="https://na.finalfantasyxiv.com/jobguide/blackmage/">官方黑魔职业指南</a>。
+使用火4 540、悖论540、绝望630、耀星900、AF1／AF3核爆336／432，均未乘天语。</p></div>
+<div class="scroll"><table><thead><tr><th>序</th><th>循环</th><th>原文p</th><th>复算p</th><th>结论</th><th>说明</th></tr></thead><tbody><tr class="吻合"><td>1</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-24">2.1 5+7起手</a></td><td>283.4</td>
+<td>283.385</td><td>吻合</td>
+<td>静态收益吻合；后续缺火苗用A3标改接续。<details><summary>计算与配图</summary><p>(8910−8100)−Q×(15−14)＝283.384615</p><p>计数：F4×12、FS×2、D×1</p><p><a href="images/03-jeQ2v-km9eZfT3cSxh-8u.png">图3</a> · <a href="images/04-jeQ2v-ix9pK1nT3cSxh-92.jpg">图4</a></p></details></td></tr>
+<tr class="吻合"><td>2</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-25">2.2 A3标改</a></td><td>0</td>
+<td>0</td><td>吻合</td>
+<td>技能数量不变；A在AF1仍为540，之后火3仍为406。<details><summary>计算与配图</summary><p>(6846−6846)−Q×(13−13)＝0</p><p>计数：B3×1、B4×1、U×1、F3×1、F4×6、A×1、FS×1、D×1</p><p><a href="images/05-jeQ2v-j8lsK1cT3cSxj-6d.jpg">图5</a></p></details></td></tr>
+<tr class="吻合"><td>3</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-26">2.3 核爆起手</a></td><td>175.4</td>
+<td>175.385</td><td>吻合</td>
+<td>图6、图8吻合；图7少一发盈余火4，收益为162，不能共用175.4。<details><summary>计算与配图</summary><p>(8802−8100)−Q×(15−14)＝175.384615</p><p>计数：F4×10、Fl3×1、FS×2、A×1、D×1</p><p>图7：9发火4版本：162</p><p><a href="images/06-jeQ2v-10isK2kT3cSxc-96.jpg">图6</a> · <a href="images/07-jeQ2v-6x4rK2iT3cSxa-92.jpg">图7</a> · <a href="images/08-jeQ2v-gl52K1eT3cSxk-6h.jpg">图8</a></p></details></td></tr>
+<tr class="末位差异"><td>4</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-27">2.4 截断起手</a></td><td>79.8</td>
+<td>79.692</td><td>末位差异</td>
+<td>完整精度结果四舍五入为79.7。<details><summary>计算与配图</summary><p>(11866−14946)−Q×(21−27)＝79.692308</p><p>计数：F4×13、D×2、FS×2、A×2、B4×1、F3×1</p><p><a href="images/09-jeQ2v-kbosZsT3cSxg-bo.png">图9</a></p></details></td></tr>
+<tr class="吻合"><td>5</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-28">2.5 冰针5+7</a></td><td>106.5</td>
+<td>106.462</td><td>吻合</td>
+<td><details><summary>计算与配图</summary><p>(10156−12156)−Q×(18−22)＝106.461538</p><p>计数：B4×1、U×1、F3×1、F4×12、FS×2、D×1</p><p><a href="images/10-jeQ2v-gv3ZnT3cSxa-bk.png">图10</a></p></details></td></tr>
+<tr class="吻合"><td>6</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-29">2.6 冰针绝望5+7</a></td><td>209.8</td>
+<td>209.846</td><td>吻合</td>
+<td><details><summary>计算与配图</summary><p>(10786−12156)−Q×(19−22)＝209.846154</p><p>计数：B4×1、U×1、F3×1、F4×12、FS×2、D×2</p><p><a href="images/11-jeQ2v-fh0qZpT3cSxj-bl.png">图11</a></p></details></td></tr>
+<tr class="吻合"><td>7</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-30">2.7 单星灵冰针绝望5+7</a></td><td>64.8</td>
+<td>64.846</td><td>吻合</td>
+<td>火3从406降至261，损失145。<details><summary>计算与配图</summary><p>(10641−12156)−Q×(19−22)＝64.846154</p><p>计数：B4×1、U×1、F3UI1×1、F4×12、FS×2、D×2</p><p><a href="images/12-jeQ2v-7d2sZpT3cSxc-bq.png">图12</a></p></details></td></tr>
+<tr class="需补条件"><td>8</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-63">2.8 魔泉剩余蓝冰针6+6</a></td><td>106.5</td>
+<td>93.077</td><td>需补条件</td>
+<td>当前图13没有U，按图为93.1；加一发U才是106.5。<details><summary>计算与配图</summary><p>(9616−12156)−Q×(17−22)＝93.076923</p><p>计数：F4×12、FS×2、B4×1、F3×1、D×1</p><p>补一发U：106.461538</p><p><a href="images/13-jeQ1a8-fnlmK24T3cSxe-93.jpg">图13</a></p></details></td></tr>
+<tr class="吻合"><td>9</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-31">2.9 剩余蓝冰针6+0</a></td><td>119.8</td>
+<td>119.846</td><td>吻合</td>
+<td>计入前段6发火4；附件06给出完整两段。<details><summary>计算与配图</summary><p>(10696−12156)−Q×(19−22)＝119.846154</p><p>计数：F4×12、A×1、FS×2、B4×1、U×1、F3×1、D×1</p><p><a href="images/extra-06-jeQ2v-9z99ZlT3cSxi-92.png">附件06</a> · <a href="images/extra-19-jeQ2v-gj0lK1tT3cSxc-9h.jpg">附件19</a></p></details></td></tr>
+<tr class="末位差异"><td>10</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-32">2.10 剩余蓝冰针6+0改</a></td><td>16.4</td>
+<td>16.462</td><td>末位差异</td>
+<td>完整精度四舍五入为16.5；用已舍入的119.8−630＋526.6会得16.4。<details><summary>计算与配图</summary><p>(10066−12156)−Q×(18−22)＝16.461538</p><p>计数：F4×12、A×1、FS×2、B4×1、U×1、F3×1</p><p><a href="images/14-jeQ2v-adnkK1nT3cSxe-91.jpg">图14</a> · <a href="images/extra-07-jeQ2v-kf54ZlT3cSxl-98.png">附件07</a></p></details></td></tr>
+<tr class="吻合"><td>11</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-33">2.11 2+7+核</a></td><td>198.3</td>
+<td>198.308</td><td>吻合</td>
+<td><details><summary>计算与配图</summary><p>(8668−12156)−Q×(15−22)＝198.307692</p><p>计数：U×1、F3×1、F4×9、D×1、Fl3×1、FS×2</p><p><a href="images/15-jeQ2v-kahmZpT3cSxf-94.png">图15</a></p></details></td></tr>
+<tr class="吻合"><td>12</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-34">2.12 剩余蓝2+7+核</a></td><td>94.9</td>
+<td>94.923</td><td>吻合</td>
+<td>相对上一条，计入前段少一发绝望：198.307692−630＋Q。<details><summary>计算与配图</summary><p>(13348−17466)−Q×(23−31)＝94.923077</p><p>计数：F4×15、A×1、FS×3、U×1、F3×1、D×1、Fl3×1</p><p><a href="images/16-jeQ2v-gj0yK21T3cSxj-93.jpg">图16</a></p></details></td></tr>
+<tr class="吻合"><td>13</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-35">2.13 一档核爆魔泉双耀星</a></td><td>−1.8</td>
+<td>-1.846</td><td>吻合</td>
+<td>首核336、次核432。<details><summary>计算与配图</summary><p>(6888−12156)−Q×(12−22)＝-1.846154</p><p>计数：U×1、Fl1×1、F4×6、FS×2、A×1、Fl3×1</p><p><a href="images/17-jeQ2v-jtszK1hT3cSxk-8z.jpg">图17</a></p></details></td></tr>
+<tr class="需补条件"><td>14</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-36">2.14 冰针绝望2+核+7</a></td><td>75.1</td>
+<td>-28.308</td><td>需补条件</td>
+<td>图18只到末尾耀星，按图为−28.3；再接一发绝望为75.1。<details><summary>计算与配图</summary><p>(8968−12156)−Q×(16−22)＝-28.307692</p><p>计数：U×1、F3×1、F4×9、D×1、Fl3×1、FS×2、B4×1</p><p>末尾再接一发D：75.076923</p><p><a href="images/18-jeQ2v-j0b5ZmT3cSx6-95.png">图18</a></p></details></td></tr>
+<tr class="吻合"><td>15</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-37">2.15 冰针3+核+0</a></td><td>−14.9</td>
+<td>-14.923</td><td>吻合</td>
+<td><details><summary>计算与配图</summary><p>(4198−6846)−Q×(8−13)＝-14.923077</p><p>计数：F3×1、F4×3、Fl3×1、FS×1、B4×1、U×1</p><p><a href="images/19-jeQ2v-7f7ZgT3cSxj-6h.png">图19</a></p></details></td></tr>
+<tr class="需补条件"><td>16</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-38">2.16 剩余蓝3+核+0</a></td><td>108.3</td>
+<td>94.923</td><td>需补条件</td>
+<td>按常规前段6火4＋A＋耀星、省D计算为94.9。108.3需另设“前段D换A”的参照，原图未给完整前段，暂不能确认。<details><summary>计算与配图</summary><p>(8038−12156)−Q×(14−22)＝94.923077</p><p>计数：F4×9、A×1、FS×2、F3×1、Fl3×1</p><p>注释的D换A假设：108.307692</p><p><a href="images/20-jeQ2v-ccipZjT3cSxb-6j.png">图20</a></p></details></td></tr>
+<tr class="吻合"><td>17</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-39">2.17 U3d</a></td><td>−3.8</td>
+<td>-3.846</td><td>吻合</td>
+<td>按补GCD口径：新增3个GCD，1576−3Q。<details><summary>计算与配图</summary><p>(1576−0)−Q×(3−0)＝-3.846154</p><p>计数：U×1、F3×1、D×1</p><p><a href="images/21-jeQ2v-4vs0K2jT3cSxq-48.png">图21</a></p></details></td></tr>
+<tr class="吻合"><td>18</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-40">2.18 UM</a></td><td>13.4</td>
+<td>13.385</td><td>吻合</td>
+<td>共同魔泉火段抵消，多一发U：540−Q。<details><summary>计算与配图</summary><p>(5850−5310)−Q×(10−9)＝13.384615</p><p>计数：F4×6、A×1、FS×1、D×1、U×1</p><p><a href="images/22-jeQ2v-e794K24T3cSxz-4d.png">图22</a></p></details></td></tr>
+<tr class="吻合"><td>19</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-41">2.19 AM</a></td><td>13.4</td>
+<td>13.385</td><td>吻合</td>
+<td>共同魔泉火段抵消，多一发A：540−Q。<details><summary>计算与配图</summary><p>(5850−5310)−Q×(10−9)＝13.384615</p><p>计数：F4×6、A×2、FS×1、D×1</p><p><a href="images/23-jeQ2v-gmpxZcT3cSxu-6p.png">图23</a></p></details></td></tr>
+<tr class="需补条件"><td>20</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-42">2.20 即刻一档冰火3</a></td><td>−145</td>
+<td>-145</td><td>需补条件</td>
+<td>−145是火3替换项。若按图中绝望后直接冰3计算，冰3再亏87，两项合计−232。<details><summary>计算与配图</summary><p>(261−406)−Q×(1−1)＝-145</p><p>计数：F3UI1×1</p><p>直接AF3冰3＋UI1火3：-232</p><p><a href="images/24-jeQ2v-cgzgZcT3cSxf-6i.png">图24</a></p></details></td></tr>
+<tr class="吻合"><td>21</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-43">2.21 A即刻冰3</a></td><td>−29</td>
+<td>-29</td><td>吻合</td>
+<td>A与U等威力，差额为261−290。<details><summary>计算与配图</summary><p>(801−830)−Q×(2−2)＝-29</p><p>计数：A×1、B3AF1×1</p><p><a href="images/25-jeQ2v-j8d7ZeT3cSxr-71.png">图25</a></p></details></td></tr>
+<tr class="需补条件"><td>22</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-44">2.22 剩余蓝A即刻冰3</a></td><td>−132</td>
+<td>-132.385</td><td>需补条件</td>
+<td>按标题接上末尾冰3，得到−132.384615，取整数−132正确；图26只画到即刻。<details><summary>计算与配图</summary><p>(7017−7676)−Q×(14−15)＝-132.384615</p><p>计数：B3×1、B4×1、U×1、F3×1、F4×6、A×2、FS×1、B3AF1×1</p><p><a href="images/26-jeQ2v-5x5eZiT3cSxh-8z.png">图26</a></p></details></td></tr>
+<tr class="吻合"><td>23</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-45">2.23 B4A核核耀</a></td><td>−125</td>
+<td>-125.077</td><td>吻合</td>
+<td>−125.076923取整数为−125。<details><summary>计算与配图</summary><p>(2508−6846)−Q×(5−13)＝-125.076923</p><p>计数：B4×1、A×1、Fl1×1、Fl3×1、FS×1</p><p><a href="images/27-jeQ2v-ezksZfT3cSxe-6k.png">图27</a></p></details></td></tr>
+<tr class="吻合"><td>24</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-48">3.1.1 双目标B4U核核耀</a></td><td>0</td>
+<td>0</td><td>吻合</td>
+<td>基准自身，p＝0。<details><summary>计算与配图</summary><p>S＝3360.6；Q2＝672.12</p><p>p＝0</p><p><a href="images/28-jeQ2v-6xs3KoT3cSxp-46.jpg">图28</a></p></details></td></tr>
+<tr class="吻合"><td>25</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-49">3.1.2 双目标B4核核耀</a></td><td>132</td>
+<td>132.12</td><td>吻合</td>
+<td>两边共同的秽浊及其GCD抵消后，少一发U。Q₂先取672时，差额式得132；132.6是绝对式的结果。<details><summary>计算与配图</summary><p>S＝3360.6；Q2＝672.12</p><p>p＝Q2−540＝132.12</p><p><a href="images/29-jeQ2v-1ls1KoT3cSxh-43.jpg">图29</a></p></details></td></tr>
+<tr class="吻合"><td>26</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-52">3.2.1 三目标玄冰U核核耀</a></td><td>0</td>
+<td>0</td><td>吻合</td>
+<td>基准自身，p＝0。<details><summary>计算与配图</summary><p>S＝4273.2；Q3＝854.64</p><p>p＝0</p><p><a href="images/30-jeQ2v-6o5yKkT3cSxj-3t.jpg">图30</a></p></details></td></tr>
+<tr class="吻合"><td>27</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-53">3.2.2 三目标玄冰核核耀</a></td><td>314.6</td>
+<td>314.64</td><td>吻合</td>
+<td>两边共同的秽浊及其GCD抵消后，少一发U。Q₃先取854.6时，差额式得314.6；314.8是绝对式的结果。<details><summary>计算与配图</summary><p>S＝4273.2；Q3＝854.64</p><p>p＝Q3−540＝314.64</p><p><a href="images/31-jeQ2v-b45uKlT3cSxd-3s.jpg">图31</a></p></details></td></tr>
+<tr class="条件公式"><td>28</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-55">3.3.1 四目标以上玄冰群雷核核耀</a></td><td>未给固定p</td>
+<td>T−540</td><td>条件公式</td>
+<td>原帖未给固定p。T为本次雷相对不放这发雷真正多出的总伤害；一换一替换U时此式成立。<details><summary>计算与配图</summary><p>完整新雷、跳满且无旧DoT损失时，T＝420n；4目标p＝1140，5目标p＝1560。</p><p>若只增加直伤，T＝100n；4目标p＝−140，5目标p＝−40。连续循环不能把每发雷都按跳满计算。</p><p><a href="images/32-jeQ2v-8hrzKnT3cSxd-41.jpg">图32</a></p></details></td></tr>
+<tr class="条件公式"><td>29</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-56">3.3.2 四目标以上玄冰核核耀</a></td><td>未给固定p</td>
+<td>Qₙ−540</td><td>条件公式</td>
+<td>共同秽浊抵消、相对U循环少一发U：4目标509.16，5目标703.68。<details><summary>计算与配图</summary><p>Qₙ＝194.52n＋271.08。此结果是对U循环的差额，不能直接叫作跳过群雷的收益。</p><p><a href="images/33-jeQ2v-h3gmKlT3cSxd-3s.jpg">图33</a></p></details></td></tr>
+<tr class="条件公式"><td>30</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-57">3.3.3 四至五目标玄冰U核核耀</a></td><td>未给固定p</td>
+<td>0；对群雷版为540−T</td><td>条件公式</td>
+<td>自身定义为参照时p＝0；和群雷版比较时，要看那发雷的实际增量伤害。<details><summary>计算与配图</summary><p>T＜540时U更高；T＞540时群雷更高。</p><p><a href="images/34-jeQ2v-k7bmKlT3cSxq-3t.jpg">图34</a></p></details></td></tr>
+<tr class="条件公式"><td>31</td>
+<td><a href="7.2%E9%BB%91%E9%AD%94%E8%BF%9B%E9%98%B6%E6%94%BB%E7%95%A5-%E5%8E%9F%E6%96%87%E6%B3%A8%E9%87%8A%E7%89%88.html#section-58">3.3.4 单星灵玄冰核核耀</a></td><td>未给固定p</td>
+<td>157.2n−511.2−Qₙ×Δt/g</td><td>条件公式</td>
+<td>HF2为UI1下90n威力；首核从336升到432。须扣HF2比普通GCD多占的时间。<details><summary>计算与配图</summary><p>g为相同加速条件下的实际GCD时长，Δt为实际额外耗时。</p><p>瞬发覆盖：4目标117.6，5目标274.8。</p><p>忽略额外延迟、双方速度相同，长读条3秒对2.5秒，即Δt/g＝0.2：4目标−92.232，5目标26.064。</p><p><a href="images/35-jeQ2v-g8n8KjT3cSxc-3y.jpg">图35</a></p></details></td></tr></tbody></table></div>
+<h2>注释公式的三处统一建议</h2>
+<p>图29与图31的舍入说明应统一使用差额式。先把Q₂取672，少U的差额是672−540＝132；先把Q₃取854.6，差额是854.6−540＝314.6。
+注释中的132.6和314.8来自另一种绝对式，不能作为差额式的舍入结果。</p>
+<p>图35正文的Δt÷2.5应写为Δt÷g，其中g是与Δt同一加速条件下的实际GCD。原文后面的修正提示已说明这一点，正文也应与之统一。</p>
+<h2>进火蓝量</h2><p>文档中的10行门槛全部算术吻合。这是进入对应火段所需的最低MP；冰段能否在相应时间内回到这个数，还取决于醒梦跳点与填充安排。带火3的路线按火苗免耗蓝。</p>
+<div class="scroll"><table><thead><tr><th>结构</th><th>最低MP</th><th>算式</th><th>结论</th></tr></thead><tbody><tr><td>AM、A即刻冰3</td><td>1600</td><td>A＝1600</td><td>吻合</td></tr><tr><td>冰针3+核+0</td><td>3200</td><td>3发火4×800＋核爆前800</td><td>吻合</td></tr><tr><td>2+7+核、剩余蓝2+7+核</td><td>4000</td><td>2发火4×1600＋绝望前800</td><td>吻合</td></tr><tr><td>冰针绝望2+核+7</td><td>4000</td><td>2发火4×800＋核爆前2400；余800接绝望</td><td>吻合</td></tr><tr><td>B4A核核耀</td><td>4000</td><td>A1600＋首核前2400；余800接第二核</td><td>吻合</td></tr><tr><td>冰针5+7</td><td>5600</td><td>3发火4×800＋2发火4×1600</td><td>吻合</td></tr><tr><td>剩余蓝3+核+0</td><td>5600</td><td>3发火4×1600＋核爆前800</td><td>吻合</td></tr><tr><td>冰针绝望5+7、单星灵冰针绝望5+7</td><td>6400</td><td>5发火4耗5600＋绝望前800</td><td>吻合</td></tr><tr><td>剩余蓝冰针6+0改</td><td>7200</td><td>3发火4×800＋3发火4×1600</td><td>吻合</td></tr><tr><td>魔泉剩余蓝冰针6+6、剩余蓝冰针6+0</td><td>8000</td><td>6发火4耗7200＋绝望前800</td><td>吻合</td></tr></tbody></table></div>
+<p class="muted">缩写：F4火4，F3火3（默认AF1），B3冰3（默认UI1），B4冰4，A火悖论，U冰悖论，D绝望，Fl1／Fl3为AF1／AF3核爆，FS耀星。
+“需补条件”各行的计算与配图可展开查看。复算脚本：<a href="audit-31-rotations.py">audit-31-rotations.py</a>。</p></main></html>
