@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<title>[黑魔法师] [幻想书库] 7.2黑魔进阶攻略</title>
+<style>
+body{max-width:900px;margin:0 auto;padding:24px 18px 60px;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+font-size:15px;line-height:1.9;color:#24292f;background:#fff;word-wrap:break-word}
+h4{font-size:15px;margin:22px 0 10px;padding-left:8px;border-left:3px solid #d0d7de}
+img{max-width:100%;height:auto;display:block;margin:8px 0;border:1px solid #eaeef2;border-radius:4px}
+.src{font-size:12.5px;line-height:1.7;color:#57606a;background:#f6f8fa;border:1px solid #d8dee4;
+border-radius:6px;padding:10px 12px;margin-bottom:22px}
+.src a{color:#0969da}
+.body{white-space:normal}
+</style></head><body>
+<div class="src">本文件是 NGA 原帖主楼正文的<b>复刻件</b>，逐字保留原文与图片位置，未改写、未增删。<br>原帖：<a href="https://ngabbs.com/read.php?tid=43757414">https://ngabbs.com/read.php?tid=43757414</a>（tid 43757414，《[黑魔法师] [幻想书库] 7.2黑魔进阶攻略》）<br>抓取日期：2026-10-01　·　图片：NGA 原图（img.nga.cn），本地化于 <code>images/</code>　·　行文规范化说明见 <code>复刻说明.md</code></div>
+<div class="body">
+7.2黑魔进阶攻略<br/>
+一、7.2改动<br/>
+1.除  冰3  ，  火3  ，  冰2  ，  火2  外，所有读条技能均改为 读条2s复唱2.5秒(不能无损插入能力技)<br/>
+2.  冰3  和  火3  威力280→290，  火4  和  冰4  威力320→300，  耀星  威力400→ 500 ， 悖论 威力520→540，与三档炽炎威力相同但 不再提供相应的冰火层数 ，异言威力880→890，秽浊衰减60%→25%，天语倍率 32%→27%<br/>
+3.星极火和灵极冰 持续时间变为永久 ，云砧(雷云)和火苗 持续时间变为永久<br/>
+4.黑魔纹持续时间30s→20s<br/>
+二、进阶循环的底层逻辑<br/>
+有蓝打火没蓝打冰dot没了补dot黑魔循环优化的原理是： 设法提高低威力技能的威力甚至是跳过低威力技能 ，或是提高大威力技能在循环中出现的频率，在做到这些的同时同步设法降低雷损。而在这个版本，具体的操作即 多打耀星和少打冰3<br/>
+三、循环/技能威力高低盈损的界定<br/>
+1. ppg算法(普适)<br/>
+7.2以前黑魔的循环或技能威力多用pps算法，而由于7.2黑魔技能咏唱时间的统一，pps算法(每秒平均威力)可以简化为ppg算法(即每gcd平均威力)， 基准循环(下附)<br/>
+也从标改变为了一档冰即刻b3版本的标改 ，本文后续所有特化循环的威力比较均以此版本标改为参考系， ppg取526.6 ，技能属于高威力技能还是低威力技能也可以此为界，<br/>
+循环盈损计算公式为：p=目标循环总威力-基准循环ppg*目标循环gcd数，结果为正则表明目标循环为正收益，反之则是负收益。<br/>
+<br/>
+<img src="images/01-jeQ2v-24j1K1gT3cSxd-6m.jpg" alt=""/>
+2.等效威力算法<br/>
+本质是割补法，该算法多用于计算由特化而引入的额外高威力技能的实际威力，通常是将高威力技能的威力割补，将前边降级的技能恢复到原初威力得出高威力技能的等效威力(如核爆起手，本质是将绝望(350威力)降级成核爆(240威力)，而降级造成的损失带来了一个额外的耀星(500威力)，则该耀星的等效威力其实是500-(350-240)=390)；亦或是引入某个技能会引起后续循环的威力盈损变动，则可以将后续盈损与该技能本身威力加和得到其等效威力<br/>
+四、特化循环介绍(仅正收益或低亏损)<br/>
+1.命名规则<br/>
+仍沿用7.1版本的用A和U分别表示火悖论和冰悖论，M表述魔泉，在介绍新规则前我们先来看7.2版本的最新特化起手，如图，我们起手选择放弃掉一个绝望与魔泉里的火悖论，魔泉前打5个f4并用魔泉打7个f4刚好凑齐两个耀星所需的12档星极魂，我们把这种 “放弃一个火阶段里的绝望且后接魔泉打7f4+绝望” 凑双耀星的结构称为“5+7”，而把有异于该结构的部分在前面写出(比如需要打b4在前边命名冰针，不跳过绝望则命名前写绝望，需要剩余蓝就写剩余蓝)<br/>
+<br/>
+<img src="images/02-jeQ2v-722kK1jT3cSxi-8y.jpg" alt=""/>
+2.特化介绍<br/>
+5+7起手    p=283.4<br/>
+<img src="images/03-jeQ2v-km9eZfT3cSxh-8u.png" alt=""/>
+<br/>
+<img src="images/04-jeQ2v-ix9pK1nT3cSxh-92.jpg" alt=""/>
+上文提的特化起手，起手将  绝望降级为f4  并将魔泉中的火悖论换成f4打双耀星，不打火悖论会导致没有火苗打标改造成隐性亏损(p=-203)，不过我们在这里先忽略掉这个亏损，原因下文解释，而在某些存在上天的副本，可以在确定有断雷容错区间后适当延后起手的雷，让雷可以打进团辅并联用三连和即刻作跳板，提供魔泉的启动窗口。<br/>
+<br/>
+新短改标改(A3标改)  p=0(冰火悖论都不加档数了哦)<br/>
+<br/>
+<img src="images/05-jeQ2v-j8lsK1cT3cSxj-6d.jpg" alt=""/>
+由于新版本星极火持续时间变为永久，现在黑魔法师的标改可以做到火苗自产自销，这也是介绍5+7时提到忽略跳过火悖论带来的隐形亏损的原因。该循环多在使用5+7或是类5+7路线后使用 ，其会导致机动性大幅下降并禁用掉许多依赖火苗的特化直到我们通过魔泉或是特化获取到新的火苗(ps：命名仅是致敬6.x版本的新短循环)<br/>
+<br/>
+核爆起手  p=175.4<br/>
+<img src="images/06-jeQ2v-10isK2kT3cSxc-96.jpg" alt=""/>
+<img src="images/07-jeQ2v-6x4rK2iT3cSxa-92.jpg" alt=""/>
+<br/>
+<img src="images/08-jeQ2v-gl52K1eT3cSxk-6h.jpg" alt=""/>
+5+7起手会导致下个魔泉前的所有标改都需要换机动性较低的新短改标改，不想承担此后果则可以换成此起手，核爆起手有一个盈余的f4可根据副本情况决定打或不打<br/>
+ps：一般来说，核爆后置的版本泛用性会更高<br/>
+<br/>
+截断起手  p=79.8<br/>
+<img src="images/09-jeQ2v-kbosZsT3cSxg-bo.png" alt=""/>
+在7.1死掉的7.05起手在7.2打赢复活赛了， 需要醒梦。相对5+7起手和核爆起手亏损太多，仅在需要增g或调整瞬发位置时考虑使用，该起手也同核爆起手有一个盈余的f4。<br/>
+<br/>
+冰针5+7  p=106.5<br/>
+<img src="images/10-jeQ2v-gv3ZnT3cSxa-bk.png" alt=""/>
+需要火苗，需要醒梦。需要至少5600蓝进火，瞬发耗费极高的特化<br/>
+<br/>
+冰针绝望5+7  p=209.8<br/>
+<img src="images/11-jeQ2v-fh0qZpT3cSxj-bl.png" alt=""/>
+需要火苗，需要醒梦。需要至少6400蓝进火，比冰针5+7消耗更多的瞬发<br/>
+<br/>
+单星灵冰针绝望5+7  p=64.8<br/>
+<img src="images/12-jeQ2v-7d2sZpT3cSxc-bq.png" alt=""/>
+需要至少6400蓝进火，需要醒梦，需要即刻<br/>
+<br/>
+魔泉剩余蓝冰针6+6(魔泉剩余蓝冰4双)  p=106.5 需要火苗，需要醒梦，至少需要8000蓝进火，跳过魔泉里的火悖论和绝望，将蓝用于后续的6f4d冰4双，利用剩余蓝可以减少实际跳蓝需求<br/>
+<br/>
+剩余蓝冰针6+0(剩余蓝冰4双) p=119.8<br/>
+<br/>
+<img src="images/13-jeQ1a8-fnlmK24T3cSxe-93.jpg" alt=""/>
+<br/>
+需要火苗，需要醒梦，需要至少8000蓝进火，+0表示此结构不需要魔泉，跳过第一个标改的绝望，将蓝留到后边打6f4d，比起魔泉剩余蓝，常态标改无法跳过火悖论，跳蓝需求大幅提高。<br/>
+<br/>
+剩余蓝冰针6+0改(剩余蓝冰4双改)  p=16.4<br/>
+<br/>
+<img src="images/14-jeQ2v-adnkK1nT3cSxe-91.jpg" alt=""/>
+需要火苗，需要醒梦，需要至少7200蓝进火，跳过绝望收益大大下降，但可以降低填充消耗<br/>
+<br/>
+2+7+核  p=198.3<br/>
+<img src="images/15-jeQ2v-kahmZpT3cSxf-94.png" alt=""/>
+需要火苗，需要醒梦，需要至少4000蓝进火，瞬发消耗极高(同冰针绝望5+7)，gcd数比冰针5+7短，因此互相不构成上下位关系。<br/>
+<br/>
+剩余蓝2+7+核  p=94.9<br/>
+<br/>
+<img src="images/16-jeQ2v-gj0yK21T3cSxj-93.jpg" alt=""/>
+<br/>
+需要火苗，需要醒梦，需要至少4000蓝进火，核爆代替绝望可以帮助我们积蓄额外的星极魂，剩余蓝可以减少填充消耗。<br/>
+<br/>
+一档核爆魔泉双耀星; p=-1.8<br/>
+<br/>
+<img src="images/17-jeQ2v-jtszK1hT3cSxk-8z.jpg" alt=""/>
+需要醒梦，补g用，比u3d亏损更低且不需要火苗<br/>
+<br/>
+冰针绝望2+核+7  p=75.1<br/>
+<img src="images/18-jeQ2v-j0b5ZmT3cSx6-95.png" alt=""/>
+需要火苗，需要醒梦，需要至少4000蓝进火，相对剩余蓝2+核+7，b4大幅降低了跳蓝需求，收益也依旧可观<br/>
+<br/>
+冰针3+核+0  p=-14.9<br/>
+<img src="images/19-jeQ2v-7f7ZgT3cSxj-6h.png" alt=""/>
+需要火苗，需要醒梦，需要至少3200蓝进火，低亏损循环，但是不耗费填充资源，可用于调轴<br/>
+<br/>
+剩余蓝3+核+0  p=108.3<br/>
+<img src="images/20-jeQ2v-ccipZjT3cSxb-6j.png" alt=""/>
+需要火苗，需要醒梦，需要至少5600蓝进火，瞬发耗费极高(同冰针绝望5+7)<br/>
+<br/>
+U3d  p=-3.8<br/>
+<img src="images/21-jeQ2v-4vs0K2jT3cSxq-48.png" alt=""/>
+需要火苗，需要醒梦，补g用<br/>
+<br/>
+UM  p=13.4<br/>
+<img src="images/22-jeQ2v-e794K24T3cSxz-4d.png" alt=""/>
+只消耗一个瞬发，简单易用的补g手法<br/>
+<br/>
+AM  p=13.4<br/>
+<img src="images/23-jeQ2v-gmpxZcT3cSxu-6p.png" alt=""/>
+需要至少1600蓝进火，需要醒梦，提供额外的火苗，可用于补g<br/>
+<br/>
+即刻一档冰f3  p=-145<br/>
+<img src="images/24-jeQ2v-cgzgZcT3cSxf-6i.png" alt=""/>
+亏损循环，消耗两个填充，但提供火苗，仅与高收益结构联用<br/>
+<br/>
+A即刻b3  p=-29<br/>
+<img src="images/25-jeQ2v-j8d7ZeT3cSxr-71.png" alt=""/>
+需要至少1600蓝进火，需要醒梦，需要即刻，提供火苗，耗费更多填充打一档冰b3可以避免亏损。<br/>
+<br/>
+剩余蓝A即刻b3  p=-132<br/>
+<img src="images/26-jeQ2v-5x5eZiT3cSxh-8z.png" alt=""/>
+需要即刻，提供火苗， 耗费更多填充打一档冰b3可以降低亏损<br/>
+<br/>
+B4A核核耀 p=-125<br/>
+<img src="images/27-jeQ2v-ezksZfT3cSxe-6k.png" alt=""/>
+需要醒梦，需要至少4000蓝进火，提供火苗<br/>
+<br/>
+AOE循环<br/>
+双目标<br/>
+b4U核核耀 p=0<br/>
+<br/>
+<img src="images/28-jeQ2v-6xs3KoT3cSxp-46.jpg" alt=""/>
+均g威力672，双目标基准循环<br/>
+<br/>
+B4核核耀  p=132<br/>
+<br/>
+<img src="images/29-jeQ2v-1ls1KoT3cSxh-43.jpg" alt=""/>
+使用dot或通晓填充跳过冰悖论，注意秽浊加强后双目标已再次强于异言<br/>
+<br/>
+关于双目标的雷<br/>
+在双目标环境下，群雷的总威力为840，而如果我们选用单体雷易得：第二个雷的等效威力约为750-(840-750)=660，(在这里我们先忽略掉上两个单雷之间的间隔导致的天然雷损)不难发现，第二个高闪雷的等效威力660已小于双目标基准循环均g威力672，不过这并不代表dot使用群雷就一定优于单体雷——雷并不只是一个单纯的伤害技能，亦是一个重要的填充技能，它可以提供窗口使用星灵移位以及代替掉冰悖论，双目标环境中单体雷使用频率为2个/30s，高****雷的1个/24s，这也意味着第二个单体雷的实际等效威力也许远高于660。因此我们在长时双目标环境下仍优先考虑上两个单雷，而仅在资源冗余或者gcd冗余时的某些短时阶段(如绝伊甸p4)考虑将部分单体雷换成群雷<br/>
+<br/>
+三目标<br/>
+玄冰U核核耀 p=0<br/>
+<br/>
+<img src="images/30-jeQ2v-6o5yKkT3cSxj-3t.jpg" alt=""/>
+三目标基准循环中，冰技能的选择从冰4变成了玄冰，ppg为854.6<br/>
+<br/>
+玄冰核核耀  p=314.6<br/>
+<br/>
+<img src="images/31-jeQ2v-b45uKlT3cSxd-3s.jpg" alt=""/>
+三目标及以上时dot选择均为高震雷<br/>
+<br/>
+四目标及以上(仅理论，不含计算)<br/>
+玄冰群雷核核耀<br/>
+<br/>
+<img src="images/32-jeQ2v-8hrzKnT3cSxd-41.jpg" alt=""/>
+四目标及以上时，群雷仅直伤就有很可观的威力，加上刷新dot的效果，等效威力已高于冰悖论<br/>
+<br/>
+玄冰核核耀<br/>
+<br/>
+<img src="images/33-jeQ2v-h3gmKlT3cSxd-3s.jpg" alt=""/>
+利用秽浊跳过低等效威力的群雷能大大提高aoe质量<br/>
+<br/>
+玄冰U核核耀(仅4-5目标)<br/>
+<br/>
+<img src="images/34-jeQ2v-k7bmKlT3cSxq-3t.jpg" alt=""/>
+在长时木桩环境下，4目标及以上群雷确实是优于冰悖论，但在一个时长有限的多目标环境下，频繁的截雷会导致某几个高震雷的等效威力仅等于直伤威力，这时冰悖论又会反超这几个群雷的威力<br/>
+<br/>
+单星灵玄冰核核耀<br/>
+<br/>
+<img src="images/35-jeQ2v-g8n8KjT3cSxc-3y.jpg" alt=""/>
+Hf2可以将第一个核爆升级为三档核爆，在时长有限的多目标环境下填充资源紧缺时可代替群雷填充，在黑魔纹里使用也可有效节约填充资源，由于hf2的咏唱时长仍大于gcd时长，因此如果能用三连/即刻覆盖也能获得额外的收益，需要注意的是，在四目标环境下，一档冰长读条hf2的等效pps仍略低于冰悖论，但如果是在黑魔纹里，一档冰长读条hf2仍可代替冰悖论以规避星灵移位cd回转问题<br/>
+<br/>
+五、实战向特化理论——冰火循环中被耀星体系孤立的冰悖论与绝望<br/>
+省流：悖论和绝望不是非打不可 众所周知，耀星的使用前置是六档星极魂，在单体循环中即使用6个火4。而在大部分情况，我们至少需要使用b34来获得6个火4所需蓝量，再通过火3进入三档星极火，然后咏唱6个火4，方能使用耀星。因此我们可以得出一个完整的耀星体系为“b34+火3+火4*6+耀星”，将耀星体系与基准循环(标准循环改)对比后可以得出，他们之间的差别是火3的档数，以及耀星体系中并不刚需冰悖论与绝望(如果你本身带有火苗实际上火悖论亦非刚需)——标准循环改中冰悖论的作用为提供窗口来使用星灵移位，但能达成此目的的技能还有异言与雷甚至是三连咏唱。而尽管绝望也同理被孤立于耀星体系，但因其在 7.1 7.2的强悍性能，笔者不认为绝望会有被放弃的场景，它应当是最后再考虑优化的技能。那么这个理论的应用场景是什么呢？ 第一就是攻略之前提到的无效减时理论，跳过冰悖论/火苗可以让你在后续后续循环中打出威力更高的火4甚至耀星，但请不要矫枉过正引入了额外的b34。 7.2黑魔再无减时理论，时代变了大人。但是在存在上天的副本，仍然可能存在无效减时 (打咏速魔晶石也是减时) ，这些无效减时我们可以用于卡g开能力技/吃爆发药。第二，跳过了某个冰悖论/三档火火苗会让后续所有gcd都提前1g，导致瞬发窗口偏移，可能会让轴从可用变为不可用，或是从不可用/难用变成可用。第三则是爆发药/团辅的覆盖，在进行绝伊甸排轴时，由于绝伊甸中存在大量的上天与持续时间较短可选中阶段，黑魔法师往往很难正好倾泄掉手上所有资源，这时技能的使用选择以及使用顺序就有了很多讲究。以绝伊甸p2开场为例，p2开场是团辅期，为了更高的团伤，我们应该把尽可能多的异言打在团辅期，所以在协助改良轴的时候，笔者提出了跳过了第一个冰悖论的建议，使得更多的异言落在了团辅里。(其实事实上这个悖论并没有被跳过，原轴为绝望收尾改良后则是绝望后的冰悖论收尾，轴威力并没有任何改变但由于团辅和爆发药内威力分布变高因而团伤变高了)而在7.2，如果我们发现无法打出最后一个耀星，则可以根据实际情况通过增g/减g循环或是跳过悖论、火苗、绝望实现跳过结尾多余的一组b34/刚好打出来耀星。<br/>
+致谢<br/>
+感谢番茄炒蛋群的各位提供的循环思路与计算数据，感谢岸谷新罗老师的排版<br/>
+<br/>
+结语<br/>
+不掉gcd真的已经很厉害了<br/>
+<h4>附件</h4>
+<!-- NGA 原帖「附件」区列出主楼全部 57 张图片（含正文已插入的 35 张）；此处只列未插入正文的 22 张，完整原始列表见 原文快照-主楼.html -->
+<img src="images/extra-01-jeQ2v-6aztK1oT3cSxh-8u.jpeg" alt=""/>
+<img src="images/extra-02-jeQ2v-cx85ZeT3cSxp-73.png" alt=""/>
+<img src="images/extra-03-jeQ2v-8q7uZjT3cSxn-8x.png" alt=""/>
+<img src="images/extra-04-jeQ2v-1t7yZiT3cSxg-94.png" alt=""/>
+<img src="images/extra-05-jeQ2v-ixhiZlT3cSxh-99.png" alt=""/>
+<img src="images/extra-06-jeQ2v-9z99ZlT3cSxi-92.png" alt=""/>
+<img src="images/extra-07-jeQ2v-kf54ZlT3cSxl-98.png" alt=""/>
+<img src="images/extra-08-jeQ2v-h7yaZoT3cSxi-90.png" alt=""/>
+<img src="images/extra-09-jeQ2v-dmawK1nT3cSxd-96.jpg" alt=""/>
+<img src="images/extra-10-jeQ2v-b1wsK1nT3cSxd-96.jpg" alt=""/>
+<img src="images/extra-11-jeQ2v-jpy2K1qT3cSxh-9b.jpg" alt=""/>
+<img src="images/extra-12-jeQ2v-br49K1dT3cSxk-6n.jpg" alt=""/>
+<img src="images/extra-13-jeQ2v-3bt1K1cT3cSxe-6j.jpg" alt=""/>
+<img src="images/extra-14-jeQ2v-70hfK1nT3cSxh-92.jpg" alt=""/>
+<img src="images/extra-15-jeQ2v-13ybKmT3cSxb-3w.jpg" alt=""/>
+<img src="images/extra-16-jeQ2v-j8epKlT3cSxq-3t.jpg" alt=""/>
+<img src="images/extra-17-jeQ2v-k7qxKoT3cSxg-45.jpg" alt=""/>
+<img src="images/extra-18-jeQ2v-c0ugK27T3cSxi-bf.jpg" alt=""/>
+<img src="images/extra-19-jeQ2v-gj0lK1tT3cSxc-9h.jpg" alt=""/>
+<img src="images/extra-20-jeQ2v-d3l9K1tT3cSxc-9h.jpg" alt=""/>
+<img src="images/extra-21-jeQ2v-2wg5K24T3cSxe-9e.jpg" alt=""/>
+<img src="images/extra-22-jeQ2v-70krK25T3cSxc-98.jpg" alt=""/>
+</div></body></html>

@@ -1,0 +1,19 @@
+{
+  "name": "XIV in the Shell",
+  "website": "https://xivintheshell.com/",
+  "repository": "https://github.com/xivintheshell/xivintheshell",
+  "commit": "08eb81788c343a684fd421a7955a4f0785f61868",
+  "downloadedOn": "2026-10-02",
+  "combatPatch": "7.5",
+  "codeLicense": "upstream/LICENSE",
+  "fontSource": "https://github.com/xivintheshell/resources/tree/gh-pages/fonts/Goldman",
+  "fontLicense": "upstream/public/fonts/Goldman/OFL.txt",
+  "localChanges": [
+    "Chinese and English BLM sequence import, initial resources and PNG automation API",
+    "Sequence panel in original simulator UI",
+    "Export original timeline canvas function",
+    "Vite output directory changed to ../site",
+    "Goldman font downloads and local font URLs",
+    "Loopback static server, Windows launcher, headless renderer, example and integration verification"
+  ]
+}

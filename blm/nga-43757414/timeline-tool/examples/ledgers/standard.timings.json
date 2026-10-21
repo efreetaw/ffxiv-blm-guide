@@ -1,0 +1,222 @@
+{
+  "name": "单体基准循环",
+  "patch": "7.5",
+  "duration": 31.59999999999999,
+  "actions": [
+    {
+      "name": "Swiftcast",
+      "start": 0,
+      "end": 0.7,
+      "invalid": []
+    },
+    {
+      "name": "Blizzard 3",
+      "start": 0.7,
+      "end": 1.4,
+      "invalid": []
+    },
+    {
+      "name": "Blizzard 4",
+      "start": 3.216666666666667,
+      "end": 5.35,
+      "invalid": []
+    },
+    {
+      "name": "Paradox",
+      "start": 5.733333333333334,
+      "end": 6.4333333333333345,
+      "invalid": []
+    },
+    {
+      "name": "Transpose",
+      "start": 6.433333333333334,
+      "end": 7.133333333333334,
+      "invalid": []
+    },
+    {
+      "name": "Fire 3",
+      "start": 8.25,
+      "end": 8.95,
+      "invalid": []
+    },
+    {
+      "name": "Fire 4",
+      "start": 10.766666666666666,
+      "end": 12.899999999999999,
+      "invalid": []
+    },
+    {
+      "name": "Fire 4",
+      "start": 13.283333333333331,
+      "end": 15.416666666666664,
+      "invalid": []
+    },
+    {
+      "name": "Fire 4",
+      "start": 15.799999999999997,
+      "end": 17.93333333333333,
+      "invalid": []
+    },
+    {
+      "name": "Fire 4",
+      "start": 18.316666666666663,
+      "end": 20.449999999999996,
+      "invalid": []
+    },
+    {
+      "name": "Fire 4",
+      "start": 20.83333333333333,
+      "end": 22.96666666666666,
+      "invalid": []
+    },
+    {
+      "name": "Fire 4",
+      "start": 23.349999999999994,
+      "end": 25.483333333333327,
+      "invalid": []
+    },
+    {
+      "name": "Paradox",
+      "start": 25.86666666666666,
+      "end": 26.56666666666666,
+      "invalid": []
+    },
+    {
+      "name": "Flare Star",
+      "start": 28.383333333333326,
+      "end": 30.51666666666666,
+      "invalid": []
+    },
+    {
+      "name": "Despair",
+      "start": 30.89999999999999,
+      "end": 31.59999999999999,
+      "invalid": []
+    }
+  ],
+  "width": 2208,
+  "height": 908,
+  "flowSteps": [
+    {
+      "key": "SWIFTCAST",
+      "label": "即刻咏唱",
+      "phase": "UI1",
+      "gcd": false,
+      "gcdNumber": 0,
+      "targets": 1
+    },
+    {
+      "key": "BLIZZARD_III",
+      "label": "冰3",
+      "phase": "UI1",
+      "gcd": true,
+      "gcdNumber": 1,
+      "targets": 1
+    },
+    {
+      "key": "BLIZZARD_IV",
+      "label": "冰4",
+      "phase": "UI3",
+      "gcd": true,
+      "gcdNumber": 2,
+      "targets": 1
+    },
+    {
+      "key": "PARADOX",
+      "label": "冰悖论 U",
+      "phase": "UI3",
+      "gcd": true,
+      "gcdNumber": 3,
+      "targets": 1
+    },
+    {
+      "key": "TRANSPOSE",
+      "label": "星灵移位",
+      "phase": "UI3",
+      "gcd": false,
+      "gcdNumber": 3,
+      "targets": 1
+    },
+    {
+      "key": "FIRE_III",
+      "label": "火3",
+      "phase": "AF1",
+      "gcd": true,
+      "gcdNumber": 4,
+      "targets": 1
+    },
+    {
+      "key": "FIRE_IV",
+      "label": "火4",
+      "phase": "AF3",
+      "gcd": true,
+      "gcdNumber": 5,
+      "targets": 1
+    },
+    {
+      "key": "FIRE_IV",
+      "label": "火4",
+      "phase": "AF3",
+      "gcd": true,
+      "gcdNumber": 6,
+      "targets": 1
+    },
+    {
+      "key": "FIRE_IV",
+      "label": "火4",
+      "phase": "AF3",
+      "gcd": true,
+      "gcdNumber": 7,
+      "targets": 1
+    },
+    {
+      "key": "FIRE_IV",
+      "label": "火4",
+      "phase": "AF3",
+      "gcd": true,
+      "gcdNumber": 8,
+      "targets": 1
+    },
+    {
+      "key": "FIRE_IV",
+      "label": "火4",
+      "phase": "AF3",
+      "gcd": true,
+      "gcdNumber": 9,
+      "targets": 1
+    },
+    {
+      "key": "FIRE_IV",
+      "label": "火4",
+      "phase": "AF3",
+      "gcd": true,
+      "gcdNumber": 10,
+      "targets": 1
+    },
+    {
+      "key": "PARADOX",
+      "label": "火悖论 A",
+      "phase": "AF3",
+      "gcd": true,
+      "gcdNumber": 11,
+      "targets": 1
+    },
+    {
+      "key": "FLARE_STAR",
+      "label": "耀星",
+      "phase": "AF3",
+      "gcd": true,
+      "gcdNumber": 12,
+      "targets": 1
+    },
+    {
+      "key": "DESPAIR",
+      "label": "绝望",
+      "phase": "AF3",
+      "gcd": true,
+      "gcdNumber": 13,
+      "targets": 1
+    }
+  ],
+  "gcdCount": 13
+}

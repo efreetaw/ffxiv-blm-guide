@@ -1,0 +1,37 @@
+{
+  "name": "单体基准循环",
+  "config": {
+    "spellSpeed": 420,
+    "skillSpeed": 420,
+    "countdown": 0,
+    "fps": 60,
+    "animationLock": 0.7,
+    "randomSeed": "ledger",
+    "procMode": "Never"
+  },
+  "initialResources": {
+    "MANA": 10000,
+    "UMBRAL_ICE": 1,
+    "PARADOX": 1,
+    "FIRESTARTER": 1
+  },
+  "actions": [
+    "即刻",
+    "冰3",
+    "冰4",
+    "U",
+    "星灵移位",
+    "火3",
+    "火4×6",
+    "A",
+    "耀星",
+    "绝望"
+  ],
+  "flow": {
+    "columns": 8,
+    "pixelRatio": 2,
+    "expectedGcd": 13,
+    "title": "单体基准循环｜13技能位／6846威力",
+    "subtitle": "初始：UI1、满蓝、冰悖论、火苗；含即刻和移位"
+  }
+}

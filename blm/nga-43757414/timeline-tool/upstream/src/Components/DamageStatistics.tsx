@@ -1,0 +1,1192 @@
+import React, { CSSProperties, useState, useEffect } from "react";
+import { Checkbox, FileFormat, Help, Input, SaveToFile } from "./Common";
+import { PotencyModifier, PotencyModifierType } from "../Game/Potency";
+import {
+	getCurrentThemeColors,
+	getThemeColors,
+	getModifierTagColor,
+	ColorThemeContext,
+} from "./ColorTheme";
+import {
+	localize,
+	localizeModifierName,
+	localizeModifierTag,
+	localizeResourceType,
+	localizeSkillName,
+} from "./Localization";
+import { controller } from "../Controller/Controller";
+import {
+	allSkillsAreIncluded,
+	DamageStatsDoTTrackingData,
+	getSkillOrDotInclude,
+	getTargetableDurationBetween,
+	updateSkillOrDoTInclude,
+} from "../Controller/DamageStatistics";
+import { getCachedValue, setCachedValue } from "../Controller/Common";
+import { ActionKey, ResourceKey, RESOURCES } from "../Game/Data";
+import { LIMIT_BREAK_ACTIONS } from "../Game/Data/Shared/LimitBreak";
+
+export type DamageStatsMainTableEntry = {
+	skillName: ActionKey;
+	displayedModifiers: PotencyModifierType[];
+	basePotency: number;
+	calculationModifiers: PotencyModifier[];
+	usageCount: number;
+	hitCount: number;
+	totalPotencyWithoutPot: number;
+	showPotency: boolean;
+	potPotency: number;
+	potCount: number;
+	partyBuffPotency: number;
+	targetCount: number;
+	falloff: number;
+};
+
+export type DamageStatsDoTTableEntry = {
+	castTime: number;
+	applicationTime: number;
+	displayedModifiers: PotencyModifierType[];
+	gap: number;
+	override: number;
+	mainPotencyHit: boolean;
+	baseMainPotency: number;
+	baseDotPotency: number;
+	initialHitCalculationModifiers: PotencyModifier[];
+	tickCalculationModifiers: PotencyModifier[];
+	totalNumTicks: number;
+	numHitTicks: number;
+	potencyWithoutPot: number;
+	potPotency: number;
+	partyBuffPotency: number;
+	mainHitFalloff: number;
+};
+
+export interface DamageStatsDoTTableSummary {
+	cumulativeGap: number;
+	cumulativeOverride: number;
+	timeSinceLastDoTDropped: number;
+	totalTicks: number;
+	maxTicks: number;
+	dotCoverageTimeFraction: number;
+	totalPotencyWithoutPot: number;
+	totalPotPotency: number;
+	totalPartyBuffPotency: number;
+}
+
+export type SelectedStatisticsData = {
+	totalDuration: number;
+	targetableDuration: number;
+	potency: {
+		applied: number;
+		pending: number;
+	};
+	gcdSkills: {
+		applied: number;
+		pending: number;
+	};
+};
+
+export enum DamageStatisticsMode {
+	Normal,
+	Historical,
+	Selected,
+}
+
+export type DamageStatisticsData = {
+	time: number;
+	tinctureBuffPercentage: number;
+	countdown: number;
+	totalPotency: {
+		applied: number;
+		pending: number;
+	};
+	lastDamageApplicationTime: number;
+	gcdSkills: {
+		applied: number;
+		pending: number;
+	};
+	mainTable: DamageStatsMainTableEntry[];
+	mainTableSummary: {
+		totalPotencyWithoutPot: number;
+		totalPotPotency: number;
+		totalPartyBuffPotency: number;
+	};
+	dotTables: Map<ResourceKey, Map<number, DamageStatsDoTTrackingData>>;
+	mode: DamageStatisticsMode;
+};
+
+export let updateDamageStats = (data: Partial<DamageStatisticsData>) => {};
+export let updateSelectedStats = (data: Partial<SelectedStatisticsData>) => {};
+
+// hook for tests to access damage stats
+export const mockDamageStatUpdateFn = (
+	updateFn: (update: Partial<DamageStatisticsData>) => void,
+) => {
+	updateDamageStats = updateFn;
+};
+
+function BuffTag(props: { buff: PotencyModifierType }) {
+	const text: string = localizeModifierTag(props.buff);
+	const color: string = getModifierTagColor(props.buff);
+	return <span
+		style={{
+			borderRadius: 2,
+			border: "1px solid " + color,
+			fontSize: 11,
+			marginRight: 4,
+			padding: "1px 4px",
+			background: color + "1f",
+		}}
+	>
+		<b style={{ color: color }}>{text}</b>
+	</span>;
+}
+
+function PotencyDisplay(props: {
+	basePotency: number;
+	helpTopic: string;
+	includeInStats: boolean;
+	explainUntargetable?: boolean;
+	calc: PotencyModifier[];
+	falloff?: number;
+	targetCount?: number;
+}) {
+	let potency = props.basePotency;
+	let potencyExplanation =
+		props.basePotency.toFixed(2) + (localize({ en: "(base)", zh: "(基础威力)" }) as string);
+	if (props.explainUntargetable) {
+		potencyExplanation += localize({ en: "(untargetable)", zh: "(不可选中)" });
+	}
+	let additiveExplanation = "";
+	props.calc.forEach((m) => {
+		if (m.kind === "adder" && m.additiveAmount > 0) {
+			potency += m.additiveAmount;
+			additiveExplanation +=
+				" + " + m.additiveAmount + "(" + localizeModifierName(m.source) + ")";
+		}
+	});
+	if (additiveExplanation) {
+		potencyExplanation = "[ " + potencyExplanation + additiveExplanation + " ]";
+	}
+	props.calc.forEach((m) => {
+		if (m.kind === "multiplier" && m.potencyFactor !== 1) {
+			potency *= m.potencyFactor;
+			potencyExplanation +=
+				" × " + m.potencyFactor + "(" + localizeModifierName(m.source) + ")";
+		}
+	});
+	if (props.targetCount && props.falloff !== undefined && props.targetCount > 1) {
+		const falloffMultiplier = 1 + (1 - props.falloff) * (props.targetCount - 1);
+		potencyExplanation = `[ ${potencyExplanation} ] × ${falloffMultiplier}(${props.targetCount}${localize({ en: " targets", zh: "个目标" })})`;
+		potency *= falloffMultiplier;
+	}
+	return <span style={{ textDecoration: props.includeInStats ? "none" : "line-through" }}>
+		{potency.toFixed(2)} <Help topic={props.helpTopic} content={potencyExplanation} />
+	</span>;
+}
+
+function DamageStatsSettings() {
+	const [tinctureBuffPercentageStr, setTinctureBuffPercentageStr] = useState("8");
+
+	const setTinctureBuffPercentage = (str: string) => {
+		setTinctureBuffPercentageStr(str);
+		const percent = parseFloat(str);
+		if (!isNaN(percent)) {
+			controller.setTinctureBuffPercentage(percent);
+			setCachedValue("tinctureBuffPercentage", str);
+		}
+	};
+
+	useEffect(() => {
+		const str = getCachedValue("tinctureBuffPercentage");
+		if (str !== null) {
+			setTinctureBuffPercentage(str);
+		} else {
+			controller.setTinctureBuffPercentage(parseFloat(tinctureBuffPercentageStr));
+		}
+	}, []);
+
+	const checkboxLabel = <span>
+		{localize({ en: "exclude damage when untargetable", zh: "Boss上天期间威力按0计算" })}{" "}
+		<Help
+			topic={"untargetableMask"}
+			content={
+				<div>
+					<div className={"paragraph"}>
+						{localize({
+							en: "Having this checked will exclude damages from untargetable phases.",
+							zh: "若勾选，统计将不包括Boss上天期间造成的伤害。",
+						})}
+					</div>
+					<div className={"paragraph"}>
+						{localize({
+							en: 'You can mark up such phases using timeline markers of type "Untargetable".',
+							zh: "可在下方用 “不可选中” 类型的时间轴标记来指定时间区间。",
+						})}
+					</div>
+					<div className={"paragraph"}>
+						{localize({
+							en: "This is just a statistics helper though. For example it doesn't prevent you from using skills when the boss is untargetable.",
+							zh: "此功能只是一个统计用的工具，在标注了 “不可选中” 的时间里其实也能正常使用技能。",
+						})}
+					</div>
+				</div>
+			}
+		/>
+	</span>;
+	return <div>
+		<Input
+			defaultValue={tinctureBuffPercentageStr}
+			description={localize({ en: " tincture potency buff ", zh: "爆发药威力加成 " })}
+			onChange={setTinctureBuffPercentage}
+			width={2}
+			style={{ display: "inline" }}
+		/>
+		<span>%</span>
+		<Checkbox
+			uniqueName={"untargetableMask"}
+			label={checkboxLabel}
+			onChange={(val) => {
+				controller.setUntargetableMask(val);
+			}}
+		/>
+		<Checkbox
+			uniqueName="autoAttackDamage"
+			label={
+				<span>
+					{localize({
+						en: "include damage from auto-attacks",
+						zh: "计算自动攻击的威力",
+					})}
+				</span>
+			}
+			onChange={(val) => controller.setIncludeAutoAttackDamage(val)}
+		/>
+	</div>;
+}
+
+const rowGap = "0.375em 0.75em";
+
+const cell = function (widthPercentage: number): CSSProperties {
+	return {
+		verticalAlign: "middle",
+		boxSizing: "border-box",
+		display: "inline-block",
+		width: widthPercentage + "%",
+		padding: rowGap,
+	};
+};
+
+function DoTTableRow(props: {
+	name: ResourceKey;
+	targetNumber: number;
+	row: DamageStatsDoTTableEntry;
+	isPetTracker?: boolean;
+}) {
+	const colors = getCurrentThemeColors();
+	const tags = props.row.displayedModifiers.map((tag, i) => <BuffTag key={i} buff={tag} />);
+
+	const gapStr = props.row.gap.toFixed(3);
+	const gapNode = props.row.gap > 0 ? <span>{gapStr}</span> : <span />;
+
+	const overrideStr = props.row.override.toFixed(3);
+	const overrideNode = props.row.override > 0 ? <span>{overrideStr}</span> : <span />;
+
+	// potency
+	// targetCount is always 1 because we generate a separate table for each target.
+	// This assumes dots have no falloff, which is currently true for all dots in the game.
+	const mainPotencyNode = <PotencyDisplay
+		basePotency={props.row.mainPotencyHit ? props.row.baseMainPotency : 0}
+		includeInStats={true}
+		explainUntargetable={!props.row.mainPotencyHit}
+		helpTopic={props.name + "Table-main-" + props.targetNumber}
+		calc={props.row.initialHitCalculationModifiers}
+		targetCount={1}
+		falloff={props.row.mainHitFalloff}
+	/>;
+	const dotPotencyNode = <PotencyDisplay
+		basePotency={props.row.baseDotPotency}
+		includeInStats={true}
+		helpTopic={props.name + "Table-dot-" + props.targetNumber}
+		calc={props.row.tickCalculationModifiers}
+		targetCount={1}
+		falloff={0}
+	/>;
+
+	// num ticks node
+	const unhitTicks = props.row.totalNumTicks - props.row.numHitTicks;
+	const numTicksNode = <span>
+		{props.row.numHitTicks}
+		{unhitTicks > 0 ? (
+			<span style={{ color: colors.timeline.untargetableDamageMark + "af" }}>
+				{" "}
+				+{unhitTicks}{" "}
+				<Help
+					topic={props.name + "Table-numUntargetableTicks-" + props.targetNumber}
+					content={localize({
+						en: "tick(s) when untargetable",
+						zh: "Boss上天期间跳DoT次数",
+					})}
+				/>
+			</span>
+		) : undefined}
+	</span>;
+
+	// total potency
+	const totalPotencyNode = <span>
+		{props.row.potencyWithoutPot.toFixed(2)}
+		{props.row.potPotency > 0 ? (
+			<span
+				style={{
+					color: colors.timeline.potCover,
+				}}
+			>
+				{" "}
+				+{props.row.potPotency.toFixed(2)}({localize({ en: "pot", zh: "爆发药" })})
+			</span>
+		) : undefined}
+		{props.row.partyBuffPotency > 0 ? (
+			<span style={{ color: colors.accent }}>
+				{" "}
+				+{props.row.partyBuffPotency.toFixed(2)}({localize({ en: "party", zh: "团辅" })})
+			</span>
+		) : undefined}
+	</span>;
+
+	return <div
+		style={{
+			textAlign: "left",
+			position: "relative",
+			borderTop: "1px solid " + colors.bgMediumContrast,
+		}}
+	>
+		{props.isPetTracker ? (
+			<>
+				<div style={cell(3)} />
+				<div style={cell(12)}>{props.row.castTime.toFixed(3)}</div>
+				<div style={cell(27)}>{tags}</div>
+				<div style={cell(20)}>{dotPotencyNode}</div>
+				<div style={cell(8)}>{numTicksNode}</div>
+				<div style={cell(30)}>{totalPotencyNode}</div>
+			</>
+		) : (
+			<>
+				<div style={cell(8)}>{props.row.castTime.toFixed(3)}</div>
+				<div style={cell(8)}>{props.row.applicationTime.toFixed(3)}</div>
+				<div style={cell(12)}>{tags}</div>
+				<div style={cell(10)}>{gapNode}</div>
+				<div style={cell(10)}>{overrideNode}</div>
+				<div style={cell(10)}>{mainPotencyNode}</div>
+				<div style={cell(10)}>{dotPotencyNode}</div>
+				<div style={cell(8)}>{numTicksNode}</div>
+				<div style={cell(24)}>{totalPotencyNode}</div>
+			</>
+		)}
+	</div>;
+}
+
+function DoTTable(props: {
+	summary: DamageStatsDoTTableSummary;
+	tableRows: DamageStatsDoTTableEntry[];
+	dotHeaderSuffix: string;
+	dotName: ResourceKey;
+	headerCellStyle: CSSProperties;
+	targetNumber: number;
+	tinctureBuffPercentage: number;
+}) {
+	const dotTableSummary = props.summary;
+	const headerCellStyle = props.headerCellStyle;
+	// right arrow
+	const dotHeaderStr = `${localizeResourceType(props.dotName)} \u2192 Boss ${props.targetNumber} ${props.dotHeaderSuffix}`;
+	const colors = getCurrentThemeColors();
+	const isPetTracker = RESOURCES[props.dotName].isPetTracker;
+	const dotTableRows = props.tableRows.map((row, i) => <DoTTableRow
+		name={props.dotName}
+		targetNumber={props.targetNumber}
+		row={row}
+		isPetTracker={isPetTracker}
+		key={i}
+	/>);
+	return <div
+		style={{
+			position: "relative",
+			margin: "0 auto",
+			marginBottom: 40,
+			maxWidth: 960,
+		}}
+	>
+		<div style={{ ...cell(100), ...{ textAlign: "center", marginBottom: 10 } }}>
+			<b style={{ color: colors.text }}>{dotHeaderStr}</b>
+		</div>
+		<div style={{ outline: "1px solid " + colors.bgMediumContrast }}>
+			<div>
+				{isPetTracker && <div style={{ display: "inline-block", width: "3%" }} />}
+				<div style={{ display: "inline-block", width: isPetTracker ? "12%" : "8%" }}>
+					<span style={headerCellStyle}>
+						<b>{localize({ en: "cast time", zh: "施放时间" })}</b>
+					</span>
+				</div>
+				{!isPetTracker && <div style={{ display: "inline-block", width: "8%" }}>
+					<span style={headerCellStyle}>
+						<b>{localize({ en: "application time", zh: "结算时间" })}</b>
+					</span>
+				</div>}
+				<div style={{ display: "inline-block", width: isPetTracker ? "27%" : "12%" }}>
+					<span style={headerCellStyle} />
+				</div>
+				{!isPetTracker && <div style={{ display: "inline-block", width: "10%" }}>
+					<span style={headerCellStyle}>
+						<b>{localize({ en: "gap", zh: "DoT间隙" })} </b>
+						<Help
+							topic={`dot-gap-title-${props.dotName}-${props.targetNumber}`}
+							content={localize({
+								en: <div>
+									<div className={"paragraph"}>
+										DoT coverage time gap since pull or previous application
+									</div>
+									<div className={"paragraph"}>
+										The last row also includes gap at the beginning and end of
+										the fight
+									</div>
+								</div>,
+								zh: <div>
+									雷DoT覆盖间隙，最后一行也包括战斗开始和结束时没有雷DoT的时间
+								</div>,
+							})}
+						/>
+					</span>
+				</div>}
+				{!isPetTracker && <div style={{ display: "inline-block", width: "10%" }}>
+					<span style={headerCellStyle}>
+						<b>{localize({ en: "override", zh: "DoT覆盖" })} </b>
+						<Help
+							topic={`dot-override-title-${props.dotName}-${props.targetNumber}`}
+							content={localize({
+								en: <div>Overridden DoT time from previous application</div>,
+								zh: <div>提前覆盖雷DoT时长</div>,
+							})}
+						/>
+					</span>
+				</div>}
+				{!isPetTracker && <div style={{ display: "inline-block", width: "10%" }}>
+					<span style={headerCellStyle}>
+						<b>{localize({ en: "initial", zh: "初始威力" })}</b>
+					</span>
+				</div>}
+				{
+					<div style={{ display: "inline-block", width: isPetTracker ? "20%" : "10%" }}>
+						<span style={headerCellStyle}>
+							<b>
+								{isPetTracker
+									? localize({ en: "last hit potency", zh: "最终击中威力" })
+									: localize({ en: "DoT", zh: "DoT威力" })}
+							</b>
+						</span>
+					</div>
+				}
+				<div style={{ display: "inline-block", width: "8%" }}>
+					<span style={headerCellStyle}>
+						<b>
+							{isPetTracker
+								? localize({ en: "hits", zh: "击中数量" })
+								: localize({ en: "ticks", zh: "跳DoT次数" })}
+						</b>
+					</span>
+				</div>
+				<div style={{ display: "inline-block", width: isPetTracker ? "30%" : "24%" }}>
+					<span style={headerCellStyle}>
+						<b>{localize({ en: "total", zh: "总威力" })}</b>
+					</span>
+				</div>
+			</div>
+			{dotTableRows}
+			<div
+				style={{
+					textAlign: "left",
+					position: "relative",
+					borderTop: "1px solid " + colors.bgMediumContrast,
+				}}
+			>
+				{isPetTracker ? (
+					<div style={cell(70)} />
+				) : (
+					<>
+						<div style={cell(28)} />
+						<div style={cell(10)}>{dotTableSummary.cumulativeGap.toFixed(3)}</div>
+						<div style={cell(10)}>{dotTableSummary.cumulativeOverride.toFixed(3)}</div>
+						<div style={cell(20)} />
+						<div style={cell(8)}>
+							{
+								/* The total tick denominator isn't terribly useful for DoTs that aren't maintained full-time */
+								controller.game.fullTimeDoTs.includes(props.dotName) ? (
+									<>
+										{dotTableSummary.totalTicks}/{dotTableSummary.maxTicks}
+									</>
+								) : (
+									<>{dotTableSummary.totalTicks}</>
+								)
+							}
+						</div>
+					</>
+				)}
+				<div style={cell(24)}>
+					{dotTableSummary.totalPotencyWithoutPot.toFixed(2)}
+					{dotTableSummary.totalPotPotency > 0 ? (
+						<span style={{ color: colors.timeline.potCover }}>
+							{" "}
+							+{dotTableSummary.totalPotPotency.toFixed(2)}
+							{localize({
+								en: "(pot +" + props.tinctureBuffPercentage + "%)",
+								zh: "(爆发药 +" + props.tinctureBuffPercentage + "%)",
+							})}
+						</span>
+					) : undefined}
+
+					{dotTableSummary.totalPartyBuffPotency > 0 ? (
+						<span style={{ color: colors.accent }}>
+							{" "}
+							+{dotTableSummary.totalPartyBuffPotency.toFixed(2)}(
+							{localize({ en: "party", zh: "团辅" })})
+						</span>
+					) : undefined}
+				</div>
+			</div>
+		</div>
+	</div>;
+}
+
+export class DamageStatistics extends React.Component {
+	selected: SelectedStatisticsData = {
+		totalDuration: 0,
+		targetableDuration: 0,
+		potency: { applied: 0, pending: 0 },
+		gcdSkills: { applied: 0, pending: 0 },
+	};
+	data: DamageStatisticsData = {
+		time: 0,
+		tinctureBuffPercentage: 0,
+		countdown: 0,
+		totalPotency: { applied: 0, pending: 0 },
+		lastDamageApplicationTime: 0,
+		gcdSkills: { applied: 0, pending: 0 },
+		mainTable: [],
+		mainTableSummary: {
+			totalPotencyWithoutPot: 0,
+			totalPotPotency: 0,
+			totalPartyBuffPotency: 0,
+		},
+		dotTables: new Map(),
+		mode: DamageStatisticsMode.Normal,
+	};
+
+	static contextType = ColorThemeContext;
+
+	constructor(props: {}) {
+		super(props);
+		updateDamageStats = (data: Partial<DamageStatisticsData>) => {
+			this.data = { ...this.data, ...data };
+			this.forceUpdate();
+		};
+		updateSelectedStats = (selected: Partial<SelectedStatisticsData>) => {
+			this.selected = { ...this.selected, ...selected };
+			this.forceUpdate();
+		};
+	}
+
+	componentWillUnmount() {
+		updateDamageStats = (data: Partial<DamageStatisticsData>) => {};
+	}
+
+	render() {
+		// @ts-expect-error: this.context is untyped, and we need this to access the ColorTheme context
+		const colors = getThemeColors(this.context);
+		const allIncluded = allSkillsAreIncluded();
+
+		//////////////////// Summary ///////////////////////
+
+		const colon = localize({ en: ": ", zh: "：" }) as string;
+		const lparen = localize({ en: " (", zh: "（" }) as string;
+		const rparen = localize({ en: ") ", zh: "）" }) as string;
+		const checkedOnlyStr = allIncluded
+			? ""
+			: (localize({ en: " (checked only)", zh: "（勾选部分）" }) as string);
+
+		const lastDisplay = this.data.lastDamageApplicationTime - this.data.countdown;
+		const targetableDurationTilLastDisplay = getTargetableDurationBetween(0, lastDisplay);
+		const ppsAvailable = this.data.lastDamageApplicationTime > -this.data.countdown;
+		const lastDamageApplicationTimeDisplay = ppsAvailable
+			? lastDisplay.toFixed(3).toString()
+			: "N/A";
+		let potencyStr = localize({ en: "Total potency", zh: "总威力" }) as string;
+		let selectedPotencyStr = localize({ en: "Selected potency", zh: "选中威力" }) as string;
+		if (this.data.tinctureBuffPercentage > 0) {
+			const s =
+				lparen +
+				(localize({ en: "pot +", zh: "爆发药 +" }) as string) +
+				this.data.tinctureBuffPercentage +
+				"%" +
+				rparen;
+			potencyStr += s;
+			selectedPotencyStr += s;
+		}
+		potencyStr += checkedOnlyStr;
+		selectedPotencyStr += checkedOnlyStr;
+
+		potencyStr += colon + this.data.totalPotency.applied.toFixed(2);
+		selectedPotencyStr += colon + this.selected.potency.applied.toFixed(2);
+		if (this.data.totalPotency.pending > 0) {
+			potencyStr +=
+				lparen +
+				this.data.totalPotency.pending.toFixed(2) +
+				(localize({ en: " pending", zh: "未结算" }) as string) +
+				rparen;
+		}
+		if (this.selected.potency.pending > 0) {
+			selectedPotencyStr +=
+				lparen +
+				this.selected.potency.pending.toFixed(2) +
+				(localize({ en: " pending", zh: "未结算" }) as string) +
+				rparen;
+		}
+
+		let gcdStr =
+			localize({ en: "GCD skills", zh: "GCD技能" }) +
+			checkedOnlyStr +
+			colon +
+			this.data.gcdSkills.applied;
+		let selectedGcdStr =
+			localize({ en: "Selected GCD skills", zh: "选中GCD技能" }) +
+			checkedOnlyStr +
+			colon +
+			this.selected.gcdSkills.applied;
+		if (this.data.gcdSkills.pending > 0) {
+			gcdStr +=
+				lparen +
+				"+" +
+				this.data.gcdSkills.pending +
+				(localize({ en: " not yet applied", zh: "未结算" }) as string) +
+				rparen;
+		}
+		if (this.selected.gcdSkills.pending > 0) {
+			selectedGcdStr +=
+				lparen +
+				"+" +
+				this.selected.gcdSkills.pending +
+				(localize({ en: " not yet applied", zh: "未结算" }) as string) +
+				rparen;
+		}
+
+		// Build DoT uptime reports for any DoT groups that have requested reporting
+		const dotUptime = controller.game.overTimeEffectGroups
+			.filter((group) => group.reportName && !group.isHealing)
+			.map((dotGroup) => {
+				const summaries = new Map<
+					number,
+					{ uptime: number; totalTicks: number; maxTicks: number }
+				>();
+				dotGroup.groupedEffects.forEach((dot) => {
+					const tables = this.data.dotTables.get(dot.effectName);
+					if (!tables) {
+						return;
+					}
+					tables.forEach((dotTable, targetNumber) => {
+						if (!summaries.has(targetNumber)) {
+							summaries.set(targetNumber, { uptime: 0, totalTicks: 0, maxTicks: 0 });
+						}
+						const summary = summaries.get(targetNumber)!;
+						summary.uptime += dotTable.summary.dotCoverageTimeFraction;
+						summary.totalTicks += dotTable.summary.totalTicks;
+						// Practically speaking, they should all come out with the same maxTicks
+						summary.maxTicks = Math.max(summary.maxTicks, dotTable.summary.maxTicks);
+					});
+				});
+
+				const summaryDivs: React.ReactNode[] = [];
+				summaries.forEach((summary, targetNumber) => {
+					let dotStr =
+						dotGroup.reportName +
+						(localize({
+							en: ` uptime (Boss ${targetNumber})`,
+							zh: `覆盖率（Boss ${targetNumber}）`,
+						}) as string) +
+						colon;
+					const { uptime, totalTicks, maxTicks } = summary;
+					dotStr += (uptime * 100).toFixed(2) + "%";
+					dotStr +=
+						lparen +
+						localize({ en: "ticks", zh: "跳DoT次数" }) +
+						colon +
+						totalTicks +
+						"/" +
+						maxTicks +
+						rparen;
+					summaryDivs.push(
+						<div key={`dot-uptime-${dotGroup.reportName}-${targetNumber}`}>
+							{dotStr}
+						</div>,
+					);
+				});
+				return summaryDivs;
+			});
+
+		let selected: React.ReactNode | undefined = undefined;
+		const selectedPPSAvailable = this.selected.targetableDuration > 0;
+		if (this.selected.totalDuration > 0) {
+			selected = <div style={{ flex: 1, color: colors.accent }}>
+				<div>
+					{localize({ en: "Selected duration", zh: "选中时长" })}
+					{colon}
+					{this.selected.totalDuration.toFixed(3)}
+				</div>
+				<div>{selectedPotencyStr}</div>
+				<div>
+					{localize({ en: "Selected PPS", zh: "选中部分PPS" })}
+					{colon}
+					{selectedPPSAvailable
+						? (
+								this.selected.potency.applied / this.selected.targetableDuration
+							).toFixed(2)
+						: "N/A"}
+				</div>
+				<div>{selectedGcdStr}</div>
+			</div>;
+		}
+
+		const summary = <div style={{ display: "flex", marginBottom: 10, flexDirection: "row" }}>
+			<div style={{ flex: 1 }}>
+				<div
+					style={{
+						color:
+							this.data.mode !== DamageStatisticsMode.Normal
+								? colors.historical
+								: colors.text,
+					}}
+				>
+					<div>
+						{localize({ en: "Last damage application time", zh: "最后伤害结算时间" })}
+						{colon}
+						{lastDamageApplicationTimeDisplay}
+					</div>
+					<div>{potencyStr}</div>
+					<div>
+						PPS{" "}
+						<Help
+							topic={"ppsNotes"}
+							content={
+								<div className={"toolTip"}>
+									<div className="paragraph">
+										{localize({
+											en: "(total applied potency of checked skills) / (total targetable duration from 0s until last damage application time).",
+											zh: "统计表中勾选技能的已结算总威力 / (从0s到最后伤害结算时间 - 不可选中总时长)。",
+										})}
+									</div>
+									<div className="paragraph">
+										{localize({
+											en: "could be inaccurate if any damage happens before pull, or if some damage's not applied yet",
+											zh: "如果有伤害在0s之前结算，或者当前有的伤害还未结算，那么此PPS可能会不准确",
+										})}
+									</div>
+								</div>
+							}
+						/>
+						{colon}
+						{ppsAvailable
+							? (
+									this.data.totalPotency.applied /
+									targetableDurationTilLastDisplay
+								).toFixed(2)
+							: "N/A"}
+					</div>
+					<div>{gcdStr}</div>
+					{dotUptime}
+				</div>
+				<div style={{ marginTop: 10 }}>
+					<DamageStatsSettings />
+					<SaveToFile
+						fileFormat={FileFormat.Csv}
+						getContentFn={() => {
+							return { body: controller.getDamageLogCsv() };
+						}}
+						filename={"damage-log"}
+						displayName={localize({
+							en: "download detailed damage log as CSV file",
+							zh: "下载详细伤害结算记录（CSV格式）",
+						})}
+					/>
+				</div>
+			</div>
+			{selected}
+		</div>;
+
+		///////////////////////// Main table //////////////////////////
+
+		const isDoTProp = (skillName: ActionKey) => controller.game.dotSkills.includes(skillName);
+
+		const isPetTracker = (skillName: ActionKey) =>
+			controller.game.petSkills.includes(skillName);
+
+		const hidePotency = function (skillName: ActionKey) {
+			if (isDoTProp(skillName)) {
+				return true;
+			}
+			const hidePotencySkills: ActionKey[] = [
+				// MCH: Queen and Wildfire have variable potencies per "tick" so just don't show them in the per-hit potency column
+				"AUTOMATON_QUEEN",
+				"WILDFIRE",
+				// Limit Break potencies don't directly translate to player potency, so don't include it in the summary
+				...(Object.keys(LIMIT_BREAK_ACTIONS) as ActionKey[]),
+			];
+			return hidePotencySkills.includes(skillName);
+		};
+
+		// omit the target count column if all abilities hit only one target
+		const makeRow = function (props: {
+			lastRowSkill?: ActionKey;
+			row: DamageStatsMainTableEntry;
+			key: number;
+		}) {
+			const sameAsLast = props.row.skillName === props.lastRowSkill;
+
+			const tags: React.ReactNode[] = [];
+			tags.push(props.row.displayedModifiers.map((tag, i) => <BuffTag key={i} buff={tag} />));
+
+			const includeInStats = getSkillOrDotInclude(props.row.skillName);
+
+			// include checkbox
+			const includeCheckboxes: React.ReactNode[] = [];
+			if (
+				!sameAsLast &&
+				props.row.basePotency > 0 &&
+				!(props.row.skillName in LIMIT_BREAK_ACTIONS)
+			) {
+				includeCheckboxes.push(
+					<input
+						key="main"
+						type={"checkbox"}
+						style={{ position: "relative", top: 2, marginRight: 10 }}
+						checked={includeInStats}
+						onChange={() => {
+							updateSkillOrDoTInclude({
+								skillNameOrDoT: props.row.skillName,
+								include: !includeInStats,
+							});
+						}}
+					/>,
+				);
+			}
+			// additional checkbox for DoT
+			if (!sameAsLast && isDoTProp(props.row.skillName)) {
+				includeCheckboxes.push(
+					<input
+						key="dot"
+						type={"checkbox"}
+						style={{ position: "relative", top: 2, marginRight: 10 }}
+						checked={getSkillOrDotInclude("DoT")}
+						onChange={() => {
+							updateSkillOrDoTInclude({
+								skillNameOrDoT: "DoT",
+								include: !getSkillOrDotInclude("DoT"),
+							});
+						}}
+					/>,
+				);
+			}
+
+			// skill name node
+			let skillNameNode: React.ReactNode | undefined = undefined;
+			if (!sameAsLast) {
+				skillNameNode = <span>
+					<span
+						style={{
+							textDecoration: includeInStats ? "none" : "line-through",
+							color: includeInStats ? colors.text : colors.bgHighContrast,
+						}}
+					>
+						{localizeSkillName(props.row.skillName)}{" "}
+					</span>
+					{isDoTProp(props.row.skillName) && <>
+						<span
+							style={{
+								textDecoration: getSkillOrDotInclude("DoT")
+									? "none"
+									: "line-through",
+								color: getSkillOrDotInclude("DoT")
+									? colors.text
+									: colors.bgHighContrast,
+							}}
+						>
+							{isPetTracker(props.row.skillName)
+								? localize({ en: "(pet)", zh: "（宠物）" })
+								: localize({ en: "(DoT)", zh: "（DoT）" })}{" "}
+						</span>
+						<Help
+							topic={`potencyStats-${props.row.skillName}`}
+							content={localize({
+								en: "See table below for details",
+								zh: "详见下方统计表格",
+							})}
+						/>
+					</>}
+				</span>;
+			}
+
+			// target count node
+			let targetCountNode: React.ReactNode | undefined = undefined;
+			if (props.row.targetCount && props.row.basePotency > 0) {
+				targetCountNode = <span
+					style={{ textDecoration: includeInStats ? "none" : "line-through" }}
+				>
+					{props.row.targetCount}
+				</span>;
+			}
+
+			// potency
+			let potencyNode: React.ReactNode | undefined = undefined;
+			if (props.row.basePotency > 0 && !hidePotency(props.row.skillName)) {
+				potencyNode = <PotencyDisplay
+					includeInStats={includeInStats}
+					basePotency={props.row.basePotency}
+					helpTopic={"mainTable-potencyCalc-" + props.key}
+					calc={props.row.calculationModifiers}
+					falloff={props.row.falloff}
+					targetCount={props.row.targetCount}
+				/>;
+			}
+
+			// usage count node
+			const unhitUsages = props.row.usageCount - props.row.hitCount;
+			const usageCountNode = <span
+				style={{ textDecoration: includeInStats ? "none" : "line-through" }}
+			>
+				{props.row.hitCount}
+				{unhitUsages > 0 ? (
+					<span style={{ color: colors.timeline.untargetableDamageMark + "af" }}>
+						{" "}
+						+{unhitUsages}{" "}
+						<Help
+							topic={"mainTable-numUntargetableUsages-" + props.key}
+							content={localize({
+								en: "usage(s) when untargetable",
+								zh: "Boss上天期间使用次数",
+							})}
+						/>
+					</span>
+				) : undefined}
+			</span>;
+
+			// total potency
+			let totalPotencyNode: React.ReactNode | undefined = undefined;
+			if (props.row.showPotency && !(props.row.skillName in LIMIT_BREAK_ACTIONS)) {
+				totalPotencyNode = <span
+					style={{ textDecoration: includeInStats ? "none" : "line-through" }}
+				>
+					{props.row.totalPotencyWithoutPot.toFixed(2)}
+					{props.row.potPotency > 0 ? (
+						<span
+							style={{
+								color: includeInStats
+									? colors.timeline.potCover
+									: colors.bgHighContrast,
+							}}
+						>
+							{" "}
+							+{props.row.potPotency.toFixed(2)}(
+							{localize({ en: "pot", zh: "爆发药" })})({props.row.potCount})
+						</span>
+					) : undefined}
+					{props.row.partyBuffPotency > 0 ? (
+						<span
+							style={{
+								color: includeInStats ? colors.accent : colors.bgHighContrast,
+							}}
+						>
+							{" "}
+							+{props.row.partyBuffPotency.toFixed(2)}(
+							{localize({ en: "party", zh: "团辅" })})
+						</span>
+					) : undefined}
+				</span>;
+			}
+			const rowStyle: CSSProperties = {
+				textAlign: "left",
+				position: "relative",
+				borderTop: sameAsLast ? "none" : "1px solid " + colors.bgMediumContrast,
+			};
+			if (!includeInStats) {
+				rowStyle.color = colors.bgHighContrast;
+			}
+			return <div key={props.key} style={rowStyle}>
+				<div style={cell(3)}>{includeCheckboxes}</div>
+				<div style={cell(18)}>{skillNameNode}</div>
+				<div style={cell(8)}>{targetCountNode}</div>
+				<div style={cell(19)}>{tags}</div>
+				<div style={cell(14)}>{potencyNode}</div>
+				<div style={cell(8)}>{usageCountNode}</div>
+				<div style={cell(30)}>{totalPotencyNode}</div>
+			</div>;
+		};
+		const tableRows: React.ReactNode[] = [];
+		for (let i = 0; i < this.data.mainTable.length; i++) {
+			tableRows.push(
+				makeRow({
+					row: this.data.mainTable[i],
+					key: i,
+					lastRowSkill: i === 0 ? undefined : this.data.mainTable[i - 1].skillName,
+				}),
+			);
+		}
+
+		const headerCellStyle: CSSProperties = {
+			display: "inline-block",
+			padding: rowGap,
+		};
+		let mainHeaderStr = allIncluded
+			? localize({ en: "Applied Skills", zh: "技能统计" })
+			: localize({ en: "Applied Skills (Checked Only)", zh: "技能统计（仅统计选中技能）" });
+		let dotHeaderSuffix = "";
+		if (this.data.mode === DamageStatisticsMode.Historical) {
+			const t = (this.data.time - this.data.countdown).toFixed(3) + "s";
+			const upTillStr =
+				lparen +
+				localize({
+					en: "up till " + t,
+					zh: "截至" + t,
+				}) +
+				rparen;
+			mainHeaderStr += upTillStr;
+			dotHeaderSuffix = upTillStr;
+		} else if (this.data.mode === DamageStatisticsMode.Selected) {
+			const selectedStr =
+				lparen +
+				localize({
+					en: "from selected skills",
+					zh: "来自选中技能",
+				}) +
+				rparen;
+			mainHeaderStr += selectedStr;
+			dotHeaderSuffix += selectedStr;
+		}
+		let titleColor = colors.text;
+		if (this.data.mode === DamageStatisticsMode.Historical) titleColor = colors.historical;
+		else if (this.data.mode === DamageStatisticsMode.Selected) titleColor = colors.accent;
+		const mainTable = <div
+			id="damageTable"
+			style={{
+				position: "relative",
+				margin: "0 auto",
+				marginBottom: 40,
+				maxWidth: 960,
+			}}
+		>
+			<div style={{ ...cell(100), ...{ textAlign: "center", marginBottom: 10 } }}>
+				<b style={{ color: titleColor }}>{mainHeaderStr}</b>
+			</div>
+			<div style={{ outline: "1px solid " + colors.bgMediumContrast }}>
+				<div>
+					<div style={{ display: "inline-block", width: "21%" }}>
+						<span style={headerCellStyle}>
+							<b>{localize({ en: "skill", zh: "技能" })}</b>
+						</span>
+					</div>
+					<div style={{ display: "inline-block", width: "27%" }}>
+						<span style={headerCellStyle}>
+							<b>{localize({ en: "targets", zh: "目标数" })}</b>
+						</span>
+					</div>
+					<div style={{ display: "inline-block", width: "14%" }}>
+						<span style={headerCellStyle}>
+							<b>{localize({ en: "potency", zh: "单次威力" })}</b>
+						</span>
+					</div>
+					<div style={{ display: "inline-block", width: "8%" }}>
+						<span style={headerCellStyle}>
+							<b>{localize({ en: "count", zh: "数量" })}</b>
+						</span>
+					</div>
+					<div style={{ display: "inline-block", width: "30%" }}>
+						<span style={headerCellStyle}>
+							<b>{localize({ en: "total", zh: "总威力" })}</b>
+						</span>
+					</div>
+				</div>
+				{tableRows}
+				<div
+					style={{
+						textAlign: "left",
+						position: "relative",
+						borderTop: "1px solid " + colors.bgMediumContrast,
+					}}
+				>
+					<div style={cell(70)} />
+					<div style={cell(30)}>
+						<span>
+							{this.data.mainTableSummary.totalPotencyWithoutPot.toFixed(2)}
+							{this.data.mainTableSummary.totalPotPotency > 0 ? (
+								<span style={{ color: colors.timeline.potCover }}>
+									{" "}
+									+{this.data.mainTableSummary.totalPotPotency.toFixed(2)}
+									{localize({
+										en: " (pot +" + this.data.tinctureBuffPercentage + "%)",
+										zh: "(爆发药 +" + this.data.tinctureBuffPercentage + "%)",
+									})}
+								</span>
+							) : undefined}
+
+							{this.data.mainTableSummary.totalPartyBuffPotency > 0 ? (
+								<span style={{ color: colors.accent }}>
+									{" "}
+									+{this.data.mainTableSummary.totalPartyBuffPotency.toFixed(2)}(
+									{localize({ en: "party", zh: "团辅" })})
+								</span>
+							) : undefined}
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>;
+
+		const dotTables: { targetNumber: number; dotName: ResourceKey; node: React.ReactNode }[] =
+			[];
+		let key = 0;
+		this.data.dotTables.forEach((table, dotName) => {
+			table.forEach((dotTrackingData, targetNumber) => {
+				const dotTableSummary = this.data.dotTables
+					.get(dotName)
+					?.get(targetNumber)?.summary;
+				if (dotTableSummary === undefined) {
+					// Should never happen, but fixes null checks below
+					return;
+				}
+				dotTables.push({
+					targetNumber,
+					dotName,
+					node: <DoTTable
+						summary={dotTableSummary}
+						tableRows={dotTrackingData.tableRows}
+						dotHeaderSuffix={dotHeaderSuffix}
+						dotName={dotName}
+						headerCellStyle={headerCellStyle}
+						targetNumber={targetNumber}
+						tinctureBuffPercentage={this.data.tinctureBuffPercentage}
+						key={key++}
+					/>,
+				});
+			});
+		});
+		// Sort by target number, then by dot name.
+		dotTables.sort((a, b) => {
+			const tnDiff = a.targetNumber - b.targetNumber;
+			if (tnDiff === 0) {
+				return a.dotName.localeCompare(b.dotName);
+			}
+			return tnDiff;
+		});
+		return <div>
+			{summary}
+			<div>
+				{mainTable}
+				{dotTables.map((d) => d.node)}
+			</div>
+		</div>;
+	}
+}

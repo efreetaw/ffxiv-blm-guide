@@ -1,0 +1,36 @@
+{
+  "name": "攻略图1基准序列（13个GCD）",
+  "config": {
+    "spellSpeed": 420,
+    "skillSpeed": 420,
+    "countdown": 0,
+    "fps": 60,
+    "animationLock": 0.7,
+    "randomSeed": "baseline",
+    "procMode": "Never"
+  },
+  "initialResources": {
+    "UMBRAL_ICE": 1,
+    "PARADOX": 1,
+    "FIRESTARTER": 1
+  },
+  "actions": [
+    "即刻",
+    "冰3",
+    "冰4",
+    "U",
+    "星灵移位",
+    "火3",
+    "火4×6",
+    "A",
+    "耀星",
+    "绝望"
+  ],
+  "export": {
+    "wrapSeconds": 20,
+    "scale": 0.4,
+    "pixelRatio": 3,
+    "includeTime": true,
+    "theme": "Light"
+  }
+}

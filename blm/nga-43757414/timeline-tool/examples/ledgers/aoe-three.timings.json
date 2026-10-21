@@ -1,0 +1,96 @@
+{
+  "name": "三目标AOE基准",
+  "patch": "7.5",
+  "duration": 12.199999999999998,
+  "actions": [
+    {
+      "name": "Freeze",
+      "start": 0,
+      "end": 2.1333333333333333,
+      "invalid": []
+    },
+    {
+      "name": "Paradox",
+      "start": 2.5166666666666666,
+      "end": 3.216666666666667,
+      "invalid": []
+    },
+    {
+      "name": "Transpose",
+      "start": 3.216666666666667,
+      "end": 3.916666666666667,
+      "invalid": []
+    },
+    {
+      "name": "Flare",
+      "start": 5.033333333333333,
+      "end": 7.166666666666666,
+      "invalid": []
+    },
+    {
+      "name": "Flare",
+      "start": 7.549999999999999,
+      "end": 9.683333333333332,
+      "invalid": []
+    },
+    {
+      "name": "Flare Star",
+      "start": 10.066666666666665,
+      "end": 12.199999999999998,
+      "invalid": []
+    }
+  ],
+  "width": 1672,
+  "height": 572,
+  "flowSteps": [
+    {
+      "key": "FREEZE",
+      "label": "玄冰",
+      "phase": "UI1",
+      "gcd": true,
+      "gcdNumber": 1,
+      "targets": 3
+    },
+    {
+      "key": "PARADOX",
+      "label": "冰悖论 U",
+      "phase": "UI1",
+      "gcd": true,
+      "gcdNumber": 2,
+      "targets": 1
+    },
+    {
+      "key": "TRANSPOSE",
+      "label": "星灵移位",
+      "phase": "UI1",
+      "gcd": false,
+      "gcdNumber": 2,
+      "targets": 1
+    },
+    {
+      "key": "FLARE",
+      "label": "核爆",
+      "phase": "AF1",
+      "gcd": true,
+      "gcdNumber": 3,
+      "targets": 3
+    },
+    {
+      "key": "FLARE",
+      "label": "核爆",
+      "phase": "AF3",
+      "gcd": true,
+      "gcdNumber": 4,
+      "targets": 3
+    },
+    {
+      "key": "FLARE_STAR",
+      "label": "耀星",
+      "phase": "AF3",
+      "gcd": true,
+      "gcdNumber": 5,
+      "targets": 3
+    }
+  ],
+  "gcdCount": 5
+}
