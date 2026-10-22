@@ -18,3 +18,5 @@ python3 research/limited-gcd/high_thunder.py --check
 ```
 
 第一条输出按后续GCD数量列出的期望收益表，第二条核对表格与跳伤枚举结果。使用Python标准库。
+
+第二题：[基准循环只打完1—13个GCD时，ΔP是多少？](limited-gcd/standard-cycle-cutoff.md)
