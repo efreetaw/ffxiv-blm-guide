@@ -154,20 +154,18 @@ export function loadFromFile(
 	const fileReader = new FileReader();
 	fileReader.onload = function (fileLoadedEvent) {
 		const str: string = fileLoadedEvent.target?.result?.toString() ?? "";
-		let json;
 		try {
-			json = JSON.parse(str);
+			callback(JSON.parse(str));
 		} catch (e) {
 			window.alert(
 				localize({
-					en: "Parse error! Are you sure this is the correct file? This tool only reads text files in JSON format.",
-					zh: "解析出错- 你确定文件没选错吗？本工具只读取JSON格式的文本文件",
-				}),
+					en: "Import failed: ",
+					zh: "导入失败：",
+				}) + String(e),
 			);
-			console.error(e);
 		}
-		callback(json);
 	};
+	fileReader.onerror = () => window.alert(String(fileReader.error));
 	fileReader.readAsText(fileObject, "UTF-8");
 }
 
@@ -192,14 +190,11 @@ export const StaticFn = {
 	},
 };
 
-const genericErrorHandler = function (err: object) {
-	console.log("[asyncFetch] some error occurred");
-};
 const fetchCache: Map<string, string> = new Map();
 export function asyncFetch(
 	url: string,
 	callback: (content: string) => void,
-	errorCallback: (err: object) => void = genericErrorHandler,
+	errorCallback: (err: object) => void,
 ) {
 	const cachedContent = fetchCache.get(url);
 	if (cachedContent) {
@@ -736,7 +731,7 @@ export function LoadJsonFromFileOrUrl(props: LoadJsonFromFileOrUrlProps) {
 
 	const onLoadUrl = () => {
 		const errorHandler = function (e: any) {
-			console.log("some error occurred");
+			window.alert(String(e));
 		};
 		asyncFetch(
 			loadUrl,

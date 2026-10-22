@@ -23,6 +23,7 @@ import {
 	applySkillMultiTarget,
 	compareDamageTables,
 	testDamageFromTimeline,
+	testRejectsTimeline,
 } from "./utils";
 
 import { controller } from "../Controller/Controller";
@@ -439,66 +440,9 @@ it(
 	}),
 );
 
-it(
-	"loads: blm_100_7.05_top_p6_delay_manafont_2.44.txt",
-	testDamageFromTimeline("blm_100_7.05_top_p6_delay_manafont_2.44.txt", {
-		// TODO these numbers are different from what's rendered on the site, need to figure out why
-		time: 268.952,
-		lastDamageApplicationTime: 268.876,
-		totalPotency: {
-			applied: 77545.052,
-			pending: 0,
-		},
-		gcdSkills: {
-			applied: 104,
-			pending: 0,
-		},
-		mainTableSummary: {
-			totalPotencyWithoutPot: 76671.37,
-			totalPotPotency: 873.68,
-		},
-		dotTables: new Map([
-			[
-				"HIGH_THUNDER",
-				new Map([
-					[
-						1,
-						{
-							summary: {
-								totalTicks: 88,
-								maxTicks: 89,
-								dotCoverageTimeFraction: 0.9788,
-								cumulativeGap: 4.966,
-								cumulativeOverride: 8.691,
-								totalPotencyWithoutPot: 8567.62,
-								totalPotPotency: 77.54,
-							},
-						},
-					],
-				]),
-			],
-		]),
-	}),
-);
+it("rejects historical format: blm_100_7.05_top_p6_delay_manafont_2.44.txt", testRejectsTimeline("blm_100_7.05_top_p6_delay_manafont_2.44.txt"));
 
-it(
-	"loads: blm_legacy_test_ll_toggle.txt",
-	testDamageFromTimeline("blm_legacy_test_ll_toggle.txt", {
-		time: 27.58,
-		lastDamageApplicationTime: 27.033,
-		totalPotency: {
-			applied: 7926.88,
-			pending: 155.14,
-		},
-		gcdSkills: {
-			applied: 11,
-			pending: 0,
-		},
-		mainTableSummary: {
-			totalPotencyWithoutPot: 7926.88,
-		},
-	}),
-);
+it("rejects historical format: blm_legacy_test_ll_toggle.txt", testRejectsTimeline("blm_legacy_test_ll_toggle.txt"));
 
 // Tests a range of DoT edge cases, including
 // - Overwriting HT with HT2

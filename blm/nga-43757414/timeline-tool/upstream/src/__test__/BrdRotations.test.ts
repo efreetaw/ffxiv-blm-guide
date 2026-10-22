@@ -5,7 +5,7 @@ import {
 	makeTestWithConfigFn,
 	applySkill,
 	compareDamageTables,
-	testDamageFromTimeline,
+	testRejectsTimeline,
 } from "./utils";
 
 import { controller } from "../Controller/Controller";
@@ -251,34 +251,6 @@ it(
 	),
 );
 
-it(
-	"loads: brd_dh_buff_test.txt",
-	testDamageFromTimeline("brd_dh_buff_test.txt", {
-		time: 0.733 + 5,
-		lastDamageApplicationTime: -0.313 + 5,
-		totalPotency: {
-			applied: 545.66,
-			pending: 84.27,
-		},
-		gcdSkills: {
-			applied: 2,
-			pending: 0,
-		},
-	}),
-);
+it("rejects historical format: brd_dh_buff_test.txt", testRejectsTimeline("brd_dh_buff_test.txt"));
 
-it(
-	"loads: brd_iron_jaws_snapshot_refresh.txt",
-	testDamageFromTimeline("brd_iron_jaws_snapshot_refresh.txt", {
-		time: 42.4 + 5,
-		lastDamageApplicationTime: 41.37 + 5,
-		totalPotency: {
-			applied: 1775,
-			pending: 455,
-		},
-		gcdSkills: {
-			applied: 2,
-			pending: 0,
-		},
-	}),
-);
+it("rejects historical format: brd_iron_jaws_snapshot_refresh.txt", testRejectsTimeline("brd_iron_jaws_snapshot_refresh.txt"));

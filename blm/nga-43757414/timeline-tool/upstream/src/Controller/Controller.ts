@@ -2,11 +2,9 @@ import React from "react";
 import {
 	CURRENT_GAME_COMBAT_PATCH,
 	getCachedValue,
-	removeCachedValue,
 	ReplayMode,
 	setCachedValue,
 	ShellInfo,
-	ShellVersion,
 	TickMode,
 } from "./Common";
 import { ClipboardMode, copy, paste } from "./Clipboard";
@@ -15,7 +13,6 @@ import { GameState } from "../Game/GameState";
 import {
 	getAutoReplacedSkillName,
 	getConditionalReplacement,
-	getNormalizedSkillName,
 } from "../Game/Skills";
 import { Buff } from "../Game/Buffs";
 import {
@@ -56,7 +53,7 @@ import {
 	unknownSkillNode,
 } from "./Record";
 import { ImageExportConfig } from "./ImageExportConfig";
-import { inferJobFromSkillNames, PresetLinesManager } from "./PresetLinesManager";
+import { PresetLinesManager } from "./PresetLinesManager";
 import { updateSkillSequencePresetsView } from "../Components/SkillSequencePresets";
 import {
 	refreshTimelineEditor,
@@ -84,7 +81,6 @@ import {
 	calculateSelectedStats,
 	getTargetableDurationBetween,
 } from "./DamageStatistics";
-import { XIVMath } from "../Game/XIVMath";
 import { TANK_JOBS, MELEE_JOBS, RANGED_JOBS, ShellJob } from "../Game/Data/Jobs";
 import { ActionKey, ACTIONS, ResourceKey, RESOURCES } from "../Game/Data";
 import { getGameState } from "../Game/Jobs";
@@ -173,7 +169,6 @@ class Controller {
 	#skipViewUpdates: boolean = false;
 	// todo: can probably somehow get rid of this because it should largely overlaps with #bInSandbox
 	displayingUpToDateGameState = true;
-	#lastTickDuration: number = 0; // used during record loads to resolve legacy wait durations
 	lastSkillTime: number = 0; // used for WaitSince.LastSkill; updated in #useSkill
 
 	undoStack: UndoStack;
@@ -414,57 +409,10 @@ class Controller {
 	}
 
 	loadBattleRecordFromFile(content: Fixme) {
-		if (content.config === undefined) {
-			window.alert("Error loading record: saved record had no config object");
-			console.error(content);
-		}
-		if (content.config.procMode === undefined) {
-			// for backward compatibility
-			if (content.config.rngProcs !== undefined) {
-				content.config.procMode = content.config.rngProcs ? ProcMode.RNG : ProcMode.Never;
-			} else {
-				content.config.procMode = ProcMode.RNG;
-			}
-		}
-		if (content.config.fps === undefined) {
-			content.config.fps = DEFAULT_CONFIG.fps;
-		}
-		if (content.config.gcdSkillCorrection === undefined) {
-			content.config.gcdSkillCorrection = DEFAULT_CONFIG.gcdSkillCorrection;
-		}
-		if (content.config.level) {
-			content.config.level = parseInt(content.config.level);
-		}
-		if (content.config.skillSpeed === undefined) {
-			content.config.skillSpeed = XIVMath.getSubstatBase(content.config.level as LevelSync);
-		}
-		if (content.config.shellVersion === undefined) {
-			content.config.shellVersion = ShellVersion.Initial;
-		}
-		if (content.config.job === undefined) {
-			// infer the job based on actions present
-			content.config.job = inferJobFromSkillNames(
-				content.actions.flatMap((skill: any) =>
-					(skill as any).skillName
-						? [getNormalizedSkillName((skill as any).skillName)]
-						: [],
-				),
-			);
-		}
-		// make sure in case anyone ever used these for non-melee jobs they are dropped here
-		if (!MELEE_JOBS.includes(content.config.job)) {
-			content.config.initialResourceOverrides =
-				content.config.initialResourceOverrides.filter(
-					(ov: any) =>
-						![RESOURCES.FLANK_POSITIONAL.name, RESOURCES.REAR_POSITIONAL.name].includes(
-							ov.type,
-						),
-				);
-		}
+		const gameConfig = GameConfig.deserialize(content.config);
+		const line = Line.deserialize(content.actions);
 
 		updateActiveTimelineEditor(() => {
-			const gameConfig = new GameConfig(content.config);
-
 			this.gameConfig = gameConfig;
 
 			this.record = new Record();
@@ -484,7 +432,6 @@ class Controller {
 			}
 
 			// now add the actions
-			const line = Line.deserialize(content.actions);
 			const replayResult = this.#replay({ line: line, replayMode: ReplayMode.Exact });
 			if (!replayResult.success) {
 				let msg = "Error loading record- \n";
@@ -1018,7 +965,6 @@ class Controller {
 		const now = this.game.time;
 		const fixedTargetTimestamp = props.deltaTime + this.game.getDisplayTime();
 		if (props.deltaTime > 0) {
-			this.#lastTickDuration = props.deltaTime;
 			const timeTicked = this.game.tick(
 				props.deltaTime,
 				props.prematureStopCondition ?? (() => false),
@@ -1361,73 +1307,6 @@ class Controller {
 					itr.info.skillName,
 				).timeTillAvailable;
 			}
-			// Account for older versions of xivintheshell, which saved waitDuration fields on
-			// non-wait actions.
-			// If the previous action had a legacyWaitDuration field that did not match the elapsed tick time,
-			// then we need to insert or adjust wait events.
-			// When legacyWaitDuration == lastTickDuration, we don't need to do any adjustments.
-			// Otherwise, we need to create a new waitDuration node or modify the duration of the current one.
-			//
-			// Example 1 (legacyWaitDuration < lastTickDuration)
-			// =================================================
-			// - The last action node is Swiftcast added in manual mode at t=0, and legacyWaitDuration is 0.
-			// - lastTickDuration is 0.7 because current sim behavior automatically advances animation lock.
-			// If the current node is not a duration wait node, then it does not matter, since old
-			// behavior would error out trying to use another action during animation lock.
-			// Suppose the current node is a duration wait of 1.0s. In older versions, this would
-			// be counted from the execution of the Swiftcast at t=0 since it had a waitDuration of 0;
-			// the next action would happen at t=1.
-			// Therefore, we need to adjust the wait node's duration to be 1-0.7=0.3; in general this is
-			//     itr.info.waitDuration = itr.info.waitDuration + (legacyWaitDuration - lastTickDuration)
-			//
-			// Example 2 (legacyWaitDuration > lastTickDuration)
-			// =================================================
-			// - The last action node is F3 at t=0 with a cast time of 3.4s, and legacyWaitDuration is 3.5.
-			// - lastTickDuration is 3.4 because that's the length of the computed animation lock.
-			// Something like this can occur as a result of an internal cast time formula change
-			// or job mechanic change. For example, Despair becoming instant in 7.1 caused this to occur
-			// for many existing BLM timelines.
-			// If the current node is not a duration wait node, then a new wait node with duration
-			//     newWaitDuration = legacyWaitDuration - lastWaitDuration
-			// must be added to compensate.
-			// If the current node is a duration wait node, then this difference is added:
-			//     itr.info.waitDuration = itr.info.waitDuration + (legacyWaitDuration - lastTickDuration)
-			// Note that this is the same formula as in example 1.
-			if (i > 0) {
-				const lastAction = originalActions[i - 1];
-				const lastLegacyWaitDuration = lastAction.legacyWaitDuration;
-				// This block assumes that legacyWaitDuration is only set on skill/setresource nodes
-				if (
-					lastLegacyWaitDuration !== undefined &&
-					Math.abs(lastLegacyWaitDuration - this.#lastTickDuration) > Debug.epsilon
-				) {
-					const delta = lastLegacyWaitDuration - this.#lastTickDuration;
-					if (delta > 0 && itr.info.type !== ActionType.Wait) {
-						// If the current action is a skill, we do a quick look-ahead to see if the delta
-						// matches the amount of time that would tick naturally before its usage, and
-						// determine whether to create a new node based on this information.
-						let waitKind: WaitKind | undefined = undefined;
-						if (itr.info.type === ActionType.Skill) {
-							const preWaitTime = this.game.getSkillAvailabilityStatus(
-								itr.info.skillName,
-							).timeTillAvailable;
-							if (Math.abs(preWaitTime - delta) > Debug.epsilon) {
-								waitKind = "duration";
-							}
-						}
-						if (waitKind) {
-							this.#requestTick({ deltaTime: delta, waitKind });
-							// Don't count this node for the purposes of firstAddedNode
-							oldLength++;
-						}
-					} else if (itr.info.type === ActionType.Wait) {
-						// Piggyback on the current wait node.
-						// Note that delta may be negative in this case
-						waitDuration += delta;
-					}
-				}
-			}
-
 			// maxReplayTime is used for replay for displaying historical game states (only replay some given duration)
 			if (
 				maxReplayTime >= 0 &&
@@ -1634,21 +1513,6 @@ class Controller {
 			}
 		}
 
-		// Perform legacy wait adjustment for the final action in the list if the last action was a skill/setresource.
-		// Always generate a new node, since there will never be a following skill for which to skip
-		// animation lock.
-		const lastAction = originalActions[originalActions.length - 1];
-		const lastLegacyWaitDuration = lastAction.legacyWaitDuration;
-		if (
-			lastLegacyWaitDuration !== undefined &&
-			(lastAction.info.type === ActionType.Skill ||
-				lastAction.info.type === ActionType.SetResourceEnabled) &&
-			Math.abs(lastLegacyWaitDuration - this.#lastTickDuration) > Debug.epsilon
-		) {
-			const delta = lastLegacyWaitDuration - this.#lastTickDuration;
-			this.#requestTick({ deltaTime: delta, waitKind: "duration" });
-		}
-
 		// Re-enable UI updates
 		this.#skipViewUpdates = oldSkipViewUpdates;
 		this.updateAllDisplay();
@@ -1666,12 +1530,6 @@ class Controller {
 	}
 
 	tryAutoLoad() {
-		const str = getCachedValue("gameRecord");
-		if (str !== null) {
-			console.log("migrating existing record to slot 0");
-			setCachedValue("gameRecord0", str);
-			removeCachedValue("gameRecord");
-		}
 		for (let i = 0; i < MAX_TIMELINE_SLOTS; i++) {
 			this.timeline.loadSlot(i);
 		}

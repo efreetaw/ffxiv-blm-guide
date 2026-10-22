@@ -6,14 +6,24 @@
 // and canvas modules. Unfortunately, the timeline editor internal interface is really messy, so we don't
 // have a clean way to test discarding or applying editor changes.
 
-import fs from "node:fs";
+import { makeDefaultConfig } from "../Game/GameConfig";
+import { ProcMode } from "../Game/Common";
+import { skillNode, durationWaitNode, jumpToTimestampNode } from "../Controller/Record";
 import { controller } from "../Controller/Controller";
 import { setCachedValue } from "../Controller/Common";
 
-const readFileToString = (relPath: string) => {
-	const absPath = "src/__test__/Asset/invalid_files/" + relPath;
-	return fs.readFileSync(absPath, "utf8");
-};
+const invalidRecords = [
+	["RDM", [skillNode("ACCELERATION"), durationWaitNode(1), durationWaitNode(1), skillNode("MANAFICATION"), durationWaitNode(1), skillNode("FLECHE"), skillNode("VERTHUNDER_III"), jumpToTimestampNode(28.7), skillNode("VERFIRE")]],
+	["BLM", [skillNode("DESPAIR"), skillNode("FIRE_III"), skillNode("DESPAIR"), skillNode("DESPAIR"), skillNode("MANAFONT")]],
+	["BLM", Array.from({ length: 5 }, () => skillNode("FIRE_III"))],
+	["SAM", [skillNode("MEIKYO_SHISUI"), skillNode("GEKKO"), skillNode("KASHA"), skillNode("YUKIKAZE"), skillNode("ZANSHIN"), skillNode("IKISHOTEN")]],
+] as const;
+const recordStrings = invalidRecords.map(([job, actions]) => JSON.stringify({
+	name: "invalid actions test",
+	fileType: "Record",
+	config: { ...makeDefaultConfig(job), spellSpeed: 914, skillSpeed: 420, criticalHit: 400, directHit: 1513, determination: 440, procMode: ProcMode.Always },
+	actions: actions.map((node) => node.serialized()),
+}));
 
 beforeEach(() => {
 	const data = new Map<string, string>();
@@ -36,13 +46,13 @@ beforeEach(() => {
 	//   Fire III is spammed until no MP remains.
 	// 4. zanshin_before_iki
 	//   Zanshin is used before Ikishoten, which grants Zanshin Ready.
-	setCachedValue("gameRecord0", readFileToString("manafic_before_combat_and_verfire_cancel.txt"));
+	setCachedValue("gameRecord0", recordStrings[0]);
 	setCachedValue("gameTime0", '{"countdown":5,"elapsedTime":35.783333333333324}');
-	setCachedValue("gameRecord1", readFileToString("no_af_despair.txt"));
+	setCachedValue("gameRecord1", recordStrings[1]);
 	setCachedValue("gameTime1", '{"countdown":5,"elapsedTime":9.85}');
-	setCachedValue("gameRecord2", readFileToString("not_enough_mp.txt"));
+	setCachedValue("gameRecord2", recordStrings[2]);
 	setCachedValue("gameTime2", '{"countdown":5,"elapsedTime":17.749999999999996}');
-	setCachedValue("gameRecord3", readFileToString("zanshin_before_iki.txt"));
+	setCachedValue("gameRecord3", recordStrings[3]);
 	setCachedValue("gameTime3", '{"countdown":5,"elapsedTime":7.833333333333334}');
 	controller.tryAutoLoad();
 });
@@ -136,7 +146,7 @@ it("has correct actions on initial load", () => {
 it("has correct actions after switching slots and loading a record from a file", () => {
 	controller.setActiveSlot(3);
 	controller.loadBattleRecordFromFile(
-		JSON.parse(readFileToString("manafic_before_combat_and_verfire_cancel.txt")),
+		JSON.parse(recordStrings[0]),
 	);
 	checkAllSlots([...DEFAULT_EXPECTED_SLOTS.slice(0, 3), DEFAULT_EXPECTED_SLOTS[0]]);
 });

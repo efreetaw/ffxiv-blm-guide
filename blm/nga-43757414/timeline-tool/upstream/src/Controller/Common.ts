@@ -55,11 +55,6 @@ export const ShellInfo = {
 	// thisExpansion is not exported so it stays local outside
 };
 
-let bContainsEwCacheContent: boolean = false;
-export function containsEwCacheContent(): boolean {
-	return bContainsEwCacheContent;
-}
-
 const thisExpansion: Expansion = Expansion.DT; // change here in ew archive
 
 // Checks if we're on beta.xivintheshell.com. Set this manually if you want to test this locally.
@@ -70,31 +65,7 @@ export const isBetaSite = window.location.hostname.startsWith("beta");
 export const isFirstVisit = localStorage.length === 0;
 
 export function getCachedValue(key: string): string | null {
-	// 2x reads from localStorage but should be fine...?
-	const current = localStorage.getItem(thisExpansion + "." + key);
-	const noPrefix = localStorage.getItem(key);
-
-	if (noPrefix !== null) {
-		// found something old
-
-		if (thisExpansion === Expansion.DT) {
-			// prompt user to go to the archive version to convert these
-			bContainsEwCacheContent = true;
-			return current;
-		} else if (thisExpansion === Expansion.EW) {
-			// we are in archive (EW): convert to EW and return
-			setCachedValue(key, noPrefix);
-			localStorage.removeItem(key);
-			console.log("migrated localStorage item: " + key);
-			return noPrefix;
-		} else {
-			// shouldn't get here
-			console.assert(false);
-			return null;
-		}
-	} else {
-		return current;
-	}
+	return localStorage.getItem(thisExpansion + "." + key);
 }
 
 export function setCachedValue(key: string, value: string) {

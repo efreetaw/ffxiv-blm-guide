@@ -4,7 +4,7 @@ import {
 	makeTestWithConfigFn,
 	applySkill,
 	compareDamageTables,
-	testDamageFromTimeline,
+	testRejectsTimeline,
 } from "./utils";
 
 import { controller } from "../Controller/Controller";
@@ -298,22 +298,4 @@ it(
 	}),
 );
 
-it(
-	"fits expected gcds in pot in opener",
-	testDamageFromTimeline("vpr_100_opener.txt", {
-		time: 42.01667 + 5,
-		lastDamageApplicationTime: 41.62967 + 5,
-		totalPotency: {
-			applied: 19494.32,
-			pending: 187.0,
-		},
-		gcdSkills: {
-			applied: 18,
-			pending: 0,
-		},
-		mainTableSummary: {
-			totalPotencyWithoutPot: 18316,
-			totalPotPotency: 1178.32,
-		},
-	}),
-);
+it("rejects historical format: vpr_100_opener.txt", testRejectsTimeline("vpr_100_opener.txt"));

@@ -16,7 +16,7 @@ async function healthy(){try{const r=await fetch(url+'/__local_health');return r
 let service,browser;
 try{
   if(!await healthy()){
-    service=spawn(process.execPath,[path.join(root,'serve.mjs')],{cwd:root,windowsHide:true,stdio:'ignore'});
+    service=spawn(process.execPath,[path.join(root,'serve.mjs')],{cwd:root,windowsHide:true,stdio:['ignore','ignore','inherit']});
     for(let i=0;i<40&&!await healthy();i++)await new Promise(resolve=>setTimeout(resolve,100));
     if(!await healthy())throw new Error(`无法在${port}端口启动本地工具`);
   }
@@ -37,7 +37,5 @@ try{
   const output=path.resolve(outputPath);
   await fs.mkdir(path.dirname(output),{recursive:true});
   await fs.writeFile(output,Buffer.from(result.png.dataUrl.split(',')[1],'base64'));
-  await fs.writeFile(output.replace(/\.png$/i,'')+'.record.json',JSON.stringify(result.summary.record,null,2));
-  await fs.writeFile(output.replace(/\.png$/i,'')+'.timings.json',JSON.stringify({...result.summary,record:undefined,width:result.png.width,height:result.png.height,...(result.png.steps?{flowSteps:result.png.steps,gcdCount:result.png.gcdCount}:{})},null,2));
   console.log(JSON.stringify({output,actions:result.summary.actions.length,gcdCount:result.png.gcdCount,duration:result.summary.duration,width:result.png.width,height:result.png.height,patch:result.summary.patch}));
 }finally{if(browser)await browser.close();if(service)service.kill()}

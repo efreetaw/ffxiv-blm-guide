@@ -12,7 +12,7 @@ import {
 	ValueChangeEvent,
 } from "./Common";
 import { ConfigApply } from "../Controller/UndoStack";
-import { getCachedValue, setCachedValue, ShellVersion, TickMode } from "../Controller/Common";
+import { getCachedValue, setCachedValue, TickMode } from "../Controller/Common";
 import { LevelSync, ProcMode } from "../Game/Common";
 import { getAllResources, getResourceInfo, ResourceOverrideData } from "../Game/Resources";
 import {
@@ -497,11 +497,6 @@ export function ConfigSummary(props: { job: ShellJob; dirty: boolean }) {
 	// These fields are deliberately updated only when `dirty` is updated and a re-render of this component is forced.
 	const procMode = controller.gameConfig.procMode;
 	const numOverrides = controller.gameConfig.initialResourceOverrides.length;
-	const legacyCasterTax = controller.gameConfig.legacy_casterTax;
-	const excerpt = localize({
-		en: `WARNING: this record was created in an earlier version of XIV in the Shell and uses the deprecated caster tax of ${legacyCasterTax}s instead of calculating from your FPS input below. Hover for details: `,
-		zh: `警告：此时间轴文件创建于一个更早版本的排轴器，因此计算读条时间时使用的是当时手动输入的读条税${legacyCasterTax}秒（现已过时），而非由下方的“帧率”和“读条时间修正”计算得来。更多信息：`,
-	});
 	const warningColor = getCurrentThemeColors().warning;
 	const tryGetImplementationWarning = (impl: ImplementationKey, warningColor: string) => {
 		const details = IMPLEMENTATION_LEVELS[impl];
@@ -517,33 +512,6 @@ export function ConfigSummary(props: { job: ShellJob; dirty: boolean }) {
 		</p>;
 	};
 
-	const legacyCasterTaxBlurbContent = localize({
-		en: <div>
-			<div className={"paragraph"}>
-				The caster tax config is now replaced by 0.1s + FPS tax and is more precise. You can
-				read more about FPS tax in the Github repository wiki's implementation notes
-				section.
-			</div>
-			<div className={"paragraph"} style={{ color: warningColor }}>
-				You are strongly encouraged to create a new record (in another timeline slot or from
-				'apply and reset') and migrate your fight plan. Support for loading legacy files
-				might drop in the future.
-			</div>
-		</div>,
-		zh: <div>
-			<div className={"paragraph"}>
-				现在的“读条税”由固定的0.1s加自动计算的帧率税构成，模拟结果也更精确。有关帧率税的更多信息详见
-				关于/实现细节。
-			</div>
-			<div className={"paragraph"} style={{ color: warningColor }}>
-				排轴器今后的更新可能会导致无法加载过时的文件，所以强烈建议将此时间轴迁移到一个新建的存档中（添加时间轴，或者应用并重置时间轴）。
-			</div>
-		</div>,
-	});
-	const legacyCasterTaxBlurb = <p style={{ color: warningColor }}>
-		{excerpt}
-		<Help topic={"legacy-caster-tax"} content={legacyCasterTaxBlurbContent} />
-	</p>;
 	return <div
 		style={{
 			textDecoration: props.dirty ? "line-through" : "none",
@@ -552,10 +520,6 @@ export function ConfigSummary(props: { job: ShellJob; dirty: boolean }) {
 			borderLeft: "1px solid " + getCurrentThemeColors().bgHighContrast,
 		}}
 	>
-		{controller.gameConfig.shellVersion < ShellVersion.FpsTax
-			? legacyCasterTaxBlurb
-			: undefined}
-
 		{tryGetImplementationWarning(JOBS[props.job].implementationLevel, warningColor)}
 
 		{["CASTER", "HEALER"].includes(JOBS[props.job].role) && <div>
@@ -1275,7 +1239,6 @@ function validateResourceOverrides(initialResourceOverrides: ResourceOverrideDat
 export function Config() {
 	const colors = getThemeColors(useContext(ColorThemeContext));
 	const [jobSpeedMod, setjobSpeedMod] = useState<number | undefined>(undefined);
-	const [shellVersion, setShellVersion] = useState<ShellVersion>(ShellVersion.AllaganGcdFormula);
 	// resource override management
 	const [initialResourceOverrides, _setInitialResourceOverrides] = useState<
 		ResourceOverrideData[]
@@ -1397,7 +1360,6 @@ export function Config() {
 	// DANGER!! CONTROLLER STATE HACK
 	useEffect(() => {
 		updateConfigDisplay = (config: SerializedConfig) => {
-			setShellVersion(config.shellVersion);
 			setInitialResourceOverrides(config.initialResourceOverrides);
 			configFieldDispatch({
 				...Object.fromEntries(
@@ -1457,8 +1419,6 @@ export function Config() {
 		configFields.level,
 		jobSpeedMod,
 	);
-	const fpsAndCorrectionColor =
-		shellVersion >= ShellVersion.FpsTax ? colors.text : colors.warning;
 	const job: ShellJob = configFields.job;
 	const isSps = JOBS[job].role === "CASTER" || JOBS[job].role === "HEALER";
 	const speedStr = {
@@ -1695,7 +1655,7 @@ export function Config() {
 		{genericInputStatWidgets}
 		<div>
 			<Input
-				componentColor={fpsAndCorrectionColor}
+				componentColor={colors.text}
 				style={{ display: "inline-block" }}
 				defaultValue={configFields.fps}
 				description={localizeConfigField("fps")}
@@ -1713,7 +1673,7 @@ export function Config() {
 			</span>
 		</div>
 		<Input
-			componentColor={fpsAndCorrectionColor}
+			componentColor={colors.text}
 			defaultValue={configFields.gcdSkillCorrection}
 			description={
 				<span>

@@ -138,6 +138,14 @@ export const testDamageFromTimeline = (
 	};
 };
 
+// Historical fixtures remain unchanged; their obsolete format is no longer replayed.
+export const testRejectsTimeline = (relPath: string) => () => {
+	const content = JSON.parse(fs.readFileSync("src/__test__/Asset/" + relPath, "utf8"));
+	const before = controller.record;
+	expect(() => controller.loadBattleRecordFromFile(content)).toThrow();
+	expect(controller.record).toBe(before);
+};
+
 // We define separate functions instead of an optional parameter to avoid accidentally
 // using the item index as argument when calling .forEach(applySkill)
 export const applySkill = (skillName: ActionKey) => applySkillMultiTarget(skillName, 1);

@@ -308,15 +308,6 @@ export function getNormalizedSkillName(s: string): ActionKey | undefined {
 	return normalizedSkillNameMap.get(s);
 }
 
-export function getResourceKeyFromBuffName(s: string): ResourceKey | undefined {
-	// If the provided string is already a key in the RESOURCES object, return it
-	if (s in RESOURCES) {
-		return s as ResourceKey;
-	}
-	// See if we can find a key in the RESOURCES where the incoming string matches the name of the resources
-	return Data.findResourceKey(s);
-}
-
 // Return a particular skill for a job.
 // Raises if the skill is not found.
 export function getSkill<T extends GameState>(job: ShellJob, skillName: ActionKey): Skill<T> {

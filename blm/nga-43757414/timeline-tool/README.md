@@ -17,7 +17,9 @@
 
 ## 基准示例与版本边界
 
-示例输入为 `examples/baseline.json`，图片为 `examples/基准序列-时间轴.png`，并附原站兼容的 `.record.json` 和含逐技能时间的 `.timings.json`。
+基准输入统一使用 `examples/ledgers/standard.json`，页面的“加载基准示例”和批量出图均读取它。初始资源上限与持续时间直接取自模拟器。
+
+`examples/baseline.json`、已有示例图片、`.record.json`、`.timings.json` 和 `examples/ledgers/verification.json` 保留为历史出图证据；脚本不再生成或更新这些附加记录。历史记录反映生成时的规则，不代表当前代码的验证结果。
 
 基准示例从1层灵极冰、1层冰悖论、1层火苗开始，满蓝；先即刻冰3，再冰4、U、移位、火3、6火4、A、耀星、绝望。配置为100级、420咏速、60 FPS、0.7秒能力技后摇，不开启黑魔纹。示例用来验证排图流程，不是起手推荐。
 
@@ -28,15 +30,15 @@
 以后给出技能顺序以及初始蓝量、冰火档位、冰针、火苗、悖论等必要条件，助手可以生成 JSON，并执行：
 
 ```powershell
-node .\render-sequence.mjs .\examples\baseline.json .\examples\基准序列-时间轴.png
+node .\render-sequence.mjs .\examples\ledgers\standard.json .\examples\standard-timeline.png
 node .\render-sequence.mjs .\examples\ledgers\standard.json ..\images\ledger-standard.png --flow
 ```
 
-脚本自动启动本地服务（如尚未运行）、调用同一模拟器、验证技能资源、等待图标加载，然后导出 PNG、Record JSON 和逐技能时间 JSON。临时启动的服务会在脚本退出时关闭。自动导出需要 Playwright 和 Chrome/Edge；当前 Codex 环境已配置。换机器可设置 `BLM_PLAYWRIGHT_PATH`（Playwright模块路径）和 `BLM_BROWSER_PATH`（浏览器路径），或在脚本所在目录安装 Playwright。时间轴图使用原站的Canvas导出函数，流程图使用同一份技能记录和图标绘制Canvas；均不依赖网页截图裁切。
+脚本自动启动本地服务（如尚未运行）、调用同一模拟器、验证技能资源、等待图标加载，然后导出一张 PNG；技能数量与耗时打印到终端。需要 Record JSON 时，在页面点击“保存原站可导入的记录 JSON”。临时启动的服务会在脚本退出时关闭。自动导出需要 Playwright 和 Chrome/Edge，可设置 `BLM_PLAYWRIGHT_PATH`（Playwright模块路径）和 `BLM_BROWSER_PATH`（浏览器路径），或在脚本所在目录安装 Playwright。时间轴图使用原站的Canvas导出函数，流程图使用同一份技能记录和图标绘制Canvas。
 
-攻略循环的5个输入保存在 `examples/ledgers/`：单体基准、起手、两段火阶段、双目标AOE、三目标AOE。执行 `node .\render-ledgers.mjs` 可重新生成 `../images/ledger-*.png`，检查GCD计数13／14／22／5／5，并把记录、逐技能信息与验证结果保存在输入旁。图题威力来自攻略7.2循环，未使用7.5模拟器的伤害结果。
+攻略循环的5个输入保存在 `examples/ledgers/`：单体基准、起手、两段火阶段、双目标AOE、三目标AOE。执行 `node .\render-ledgers.mjs` 可按这5个现有输入重新生成 `../images/ledger-*.png`；预期GCD计数由各输入的 `flow.expectedGcd` 指定，在导出时检查。图题威力来自攻略7.2循环，未使用7.5模拟器的伤害结果。
 
-JSON格式示例见 `examples/baseline.json`：
+JSON格式示例见 `examples/ledgers/standard.json`：
 
 - `config`：咏速、FPS、倒计时、能力技后摇等模拟配置。
 - `initialResources`：`MANA`蓝量，`ASTRAL_FIRE`火档位，`UMBRAL_ICE`冰档位，`UMBRAL_HEART`冰针，`FIRESTARTER`火苗，`PARADOX`悖论，`POLYGLOT`通晓等。
@@ -51,5 +53,7 @@ JSON格式示例见 `examples/baseline.json`：
 固定上游提交：`08eb81788c343a684fd421a7955a4f0785f61868`。
 
 上游源码位于 `upstream/`；原始MIT许可保存在 `upstream/LICENSE`，原作者版权声明保留。`site/` 是可以离线运行的构建文件和全部原站资源。Goldman字体也已下载到本地，附带原始OFL许可。当前新增改动：`LocalSequenceTools.tsx`、Main中的导入面板、对原图片导出函数增加导出声明、Vite输出目录调整、字体路径本地化，以及本地启动/自动出图脚本。依赖、日志与PID不进入版本控制。
+
+本地副本仅使用当前记录格式和计算公式，不再自动转换旧资源名称、`targetCount`、技能内嵌等待时间或旧版读条税；不支持的记录在导入入口报错。技能预设直接保存职业，不再从技能猜测；已存属性缺项时明确报错。上游历史测试输入保留原样，对应导入测试检查拒绝旧格式；当前记录仍覆盖回放、编辑、撤销及非法技能提示。JSON 导入错误和 FFLogs 查询失败直接显示原因，不按空数据继续。
 
 重建：在 `upstream/` 执行 `npm ci`、`npm run typecheck`、`npm run build`，输出到 `site/`。不要用 `file://` 直接打开构建页，浏览器的模块与图片加载应通过上面的本机地址进行。

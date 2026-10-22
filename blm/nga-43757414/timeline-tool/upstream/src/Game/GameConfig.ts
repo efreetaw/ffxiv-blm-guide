@@ -1,9 +1,9 @@
 import { Debug, ProcMode, LevelSync, FIXED_BASE_CASTER_TAX } from "./Common";
-import { ResourceOverride, ResourceOverrideData } from "./Resources";
+import { getAllResources, ResourceOverride, ResourceOverrideData } from "./Resources";
 import { getCachedValue, setCachedValue, ShellInfo, ShellVersion } from "../Controller/Common";
 import { XIVMath } from "./XIVMath";
-import { ShellJob } from "./Data/Jobs";
-import { CooldownKey, COOLDOWNS, ResourceKey, RESOURCES } from "./Data";
+import { JOBS, ShellJob } from "./Data/Jobs";
+import { ResourceKey } from "./Data";
 
 export type ConfigData = {
 	job: ShellJob;
@@ -310,20 +310,17 @@ export function getSavedConfigPart(job: ShellJob): DynamicConfigPart {
 	const parsedBlob = JSON.parse(blob);
 	// We only store combat stats directly in localStorage so they remain independent between jobs.
 	// Remaining stats (like fps and countdown) are shared across job swap.
-	// If anything is missing, just fill it in from the default.
-	Object.entries(JOB_DEFAULT_FIELDS[job]).forEach(([key, value]) => {
+	for (const key of Object.keys(JOB_DEFAULT_FIELDS[job])) {
 		if (parsedBlob[key] === undefined) {
-			parsedBlob[key] = value;
+			throw new Error(`Saved ${job} stats are missing: ${key}`);
 		}
-	});
-	return parsedBlob as ConfigData;
+	}
+	return parsedBlob as DynamicConfigPart;
 }
 
 export const DEFAULT_CONFIG = makeDefaultConfig("BLM");
 
-export type SerializedConfig = ConfigData & {
-	casterTax: number; // still want this bc don't want to break cached timelines
-};
+export type SerializedConfig = ConfigData;
 
 export class GameConfig {
 	readonly job: ShellJob;
@@ -346,41 +343,38 @@ export class GameConfig {
 	readonly timeTillFirstManaTick: number;
 	readonly procMode: ProcMode;
 	readonly initialResourceOverrides: ResourceOverride[];
-	readonly legacy_casterTax: number;
 
-	constructor(props: {
-		job: ShellJob;
-		shellVersion: ShellVersion;
-		level: LevelSync;
-		wd?: number;
-		main?: number;
-		spellSpeed: number;
-		skillSpeed: number;
-		criticalHit: number;
-		directHit: number;
-		determination: number;
-		piety: number;
-		tenacity?: number;
-		countdown: number;
-		randomSeed: string;
-		fps: number;
-		gcdSkillCorrection: number;
-		animationLock: number;
-		timeTillFirstManaTick: number;
-		procMode: ProcMode;
-		initialResourceOverrides: (ResourceOverrideData & { enabled?: boolean })[];
-		casterTax?: number; // legacy
-	}) {
+	static deserialize(config: ConfigData): GameConfig {
+		if (!config || config.shellVersion !== ShellInfo.version || !(config.job in JOBS)) {
+			throw new Error("Unsupported record config: a current shellVersion and job are required.");
+		}
+		const missing = Object.keys(DEFAULT_CONFIG).filter(
+			(key) => config[key as keyof ConfigData] === undefined,
+		);
+		if (missing.length) {
+			throw new Error(`Record config is missing: ${missing.join(", ")}`);
+		}
+		for (const override of config.initialResourceOverrides) {
+			if (
+				!getAllResources(config.job).has(override.type) ||
+				typeof override.effectOrTimerEnabled !== "boolean"
+			) {
+				throw new Error(`Unsupported resource override: ${override.type}`);
+			}
+		}
+		return new GameConfig(config);
+	}
+
+	constructor(props: ConfigData) {
 		this.job = props.job;
 		this.shellVersion = props.shellVersion;
-		const defaultConfig = DEFAULT_CONFIG;
-		this.level = props.level ?? defaultConfig.level;
+		this.level = props.level;
 		this.spellSpeed = props.spellSpeed;
-		this.skillSpeed = props.skillSpeed ?? defaultConfig.skillSpeed;
-		this.criticalHit = props.criticalHit ?? defaultConfig.criticalHit;
-		this.directHit = props.directHit ?? defaultConfig.directHit;
-		this.determination = props.determination ?? defaultConfig.determination;
-		this.piety = props.piety ?? defaultConfig.piety;
+		this.skillSpeed = props.skillSpeed;
+		this.criticalHit = props.criticalHit;
+		this.directHit = props.directHit;
+		this.determination = props.determination;
+		this.piety = props.piety;
 		this.countdown = props.countdown;
 		this.randomSeed = props.randomSeed;
 		this.fps = props.fps;
@@ -388,46 +382,12 @@ export class GameConfig {
 		this.animationLock = props.animationLock;
 		this.timeTillFirstManaTick = props.timeTillFirstManaTick;
 		this.procMode = props.procMode;
-		this.initialResourceOverrides = props.initialResourceOverrides.map((obj) => {
-			if (obj.effectOrTimerEnabled === undefined) {
-				// backward compatibility:
-				if (obj.enabled === undefined) obj.effectOrTimerEnabled = true;
-				else obj.effectOrTimerEnabled = obj.enabled;
-			}
-			// Backwards compatibility re: change to keyed data
-			if (!(obj.type in RESOURCES || obj.type in COOLDOWNS)) {
-				// Special case a few spelling changes made during the transition
-				if (obj.type.toString() === "AstralFire") {
-					obj.type = "ASTRAL_FIRE";
-				} else if (obj.type.toString() === "UmbralIce") {
-					obj.type = "UMBRAL_ICE";
-				} else if (obj.type.toString() === "UmbralHeart") {
-					obj.type = "UMBRAL_HEART";
-				} else {
-					// Try to find the key in RESOURCES
-					let key: ResourceKey | CooldownKey | undefined = Object.keys(RESOURCES).find(
-						(key) => RESOURCES[key as ResourceKey].name === obj.type,
-					) as ResourceKey;
-					// If not found, check COOLDOWNS next
-					if (!key) {
-						key = Object.keys(COOLDOWNS).find(
-							(key) => COOLDOWNS[key as CooldownKey].name === obj.type,
-						) as CooldownKey;
-					}
-					// If we found it in either data set, assign the key as the type
-					if (key) {
-						obj.type = key;
-					}
-				}
-			}
-			return new ResourceOverride(obj);
-		});
-		// backward compatibility for caster tax:
-		this.legacy_casterTax = props?.casterTax ?? 0;
-		// hidden stats currently used only for combat sim export
-		this.tenacity = props?.tenacity ?? 420;
-		this.main = props?.main ?? OTHER_MAIN;
-		this.wd = props?.wd ?? CURRENT_BIS_WD;
+		this.initialResourceOverrides = props.initialResourceOverrides.map(
+			(obj) => new ResourceOverride(obj),
+		);
+		this.tenacity = props.tenacity;
+		this.main = props.main;
+		this.wd = props.wd;
 	}
 
 	// Presuming DoT and Hot potency calculations work the same way...
@@ -445,19 +405,11 @@ export class GameConfig {
 
 	// returns GCD before FPS tax
 	adjustedGCD(baseGCD: number = 2.5, speedModifier?: number) {
-		if (this.shellVersion >= ShellVersion.AllaganGcdFormula) {
-			return XIVMath.preTaxGcd(this.level, this.spellSpeed, baseGCD, speedModifier);
-		} else {
-			return XIVMath.preTaxGcdLegacy(this.level, this.spellSpeed, baseGCD, speedModifier);
-		}
+		return XIVMath.preTaxGcd(this.level, this.spellSpeed, baseGCD, speedModifier);
 	}
 
 	adjustedSksGCD(baseGCD: number = 2.5, speedModifier?: number) {
-		if (this.shellVersion >= ShellVersion.AllaganGcdFormula) {
-			return XIVMath.preTaxGcd(this.level, this.skillSpeed, baseGCD, speedModifier);
-		} else {
-			return XIVMath.preTaxGcdLegacy(this.level, this.skillSpeed, baseGCD, speedModifier);
-		}
+		return XIVMath.preTaxGcd(this.level, this.skillSpeed, baseGCD, speedModifier);
 	}
 
 	// returns cast time before FPS and caster tax
@@ -471,17 +423,11 @@ export class GameConfig {
 
 	// for gcd
 	getAfterTaxGCD(beforeTaxGCD: number) {
-		if (this.shellVersion < ShellVersion.FpsTax) {
-			return beforeTaxGCD;
-		}
 		return XIVMath.afterFpsTax(this.fps, beforeTaxGCD) + this.gcdSkillCorrection;
 	}
 
 	// for casts
 	getAfterTaxCastTime(capturedCastTime: number) {
-		if (this.shellVersion < ShellVersion.FpsTax) {
-			return this.legacy_casterTax + capturedCastTime;
-		}
 		return (
 			XIVMath.afterFpsTax(this.fps, capturedCastTime) +
 			XIVMath.afterFpsTax(this.fps, FIXED_BASE_CASTER_TAX) +
@@ -525,7 +471,6 @@ export class GameConfig {
 			tenacity: this.tenacity,
 			countdown: this.countdown,
 			randomSeed: this.randomSeed,
-			casterTax: this.legacy_casterTax, // still want this bc don't want to break cached timelines
 			fps: this.fps,
 			gcdSkillCorrection: this.gcdSkillCorrection,
 			animationLock: this.animationLock,

@@ -4,7 +4,7 @@ import {
 	makeTestWithConfigFn,
 	applySkill,
 	compareDamageTables,
-	testDamageFromTimeline,
+	testRejectsTimeline,
 } from "./utils";
 
 import { controller } from "../Controller/Controller";
@@ -152,21 +152,4 @@ it(
 	}),
 );
 
-it(
-	"fits expected gcds in rof and bh in opener",
-	testDamageFromTimeline("mnk_100_solar_lunar.txt", {
-		time: 24.862 + 10,
-		lastDamageApplicationTime: 24.862 + 10,
-		totalPotency: {
-			applied: 15720.61,
-			pending: 114.57,
-		},
-		gcdSkills: {
-			applied: 15,
-			pending: 0,
-		},
-		mainTableSummary: {
-			totalPotencyWithoutPot: 14624.6,
-		},
-	}),
-);
+it("rejects historical format: mnk_100_solar_lunar.txt", testRejectsTimeline("mnk_100_solar_lunar.txt"));

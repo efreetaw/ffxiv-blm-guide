@@ -1,29 +1,9 @@
 import { FileType, getCachedValue, setCachedValue } from "./Common";
-import { ActionType, Line } from "./Record";
-import { jobHasSkill } from "../Game/Skills";
+import { Line } from "./Record";
 import { updateSkillSequencePresetsView } from "../Components/SkillSequencePresets";
-import { ShellJob, ALL_JOBS } from "../Game/Data/Jobs";
-import { ActionKey } from "../Game/Data";
+import { ShellJob, JOBS } from "../Game/Data/Jobs";
 
 type Fixme = any;
-
-export function inferJobFromSkillNames(actions: ActionKey[]): ShellJob {
-	// Helper function used for migrating from BLM/PCT in the Shell to multi-job support.
-	//
-	// Iterate over the whole record and return the number of actions that occur in each job.
-	// If two jobs are tied (like if there's only a Swiftcast/Sprint in the timeline), just
-	// take the first that appears since it doesn't really matter.
-	let maxJob = ALL_JOBS[0];
-	let maxCount = 0;
-	ALL_JOBS.forEach((job) => {
-		const count = actions.reduce((acc, skill) => (jobHasSkill(job, skill) ? acc + 1 : acc), 0);
-		if (count > maxCount) {
-			maxJob = job;
-			maxCount = count;
-		}
-	});
-	return maxJob;
-}
 
 export class PresetLinesManager {
 	presetLines: { actions: Line; job: ShellJob }[] = [];
@@ -49,18 +29,16 @@ export class PresetLinesManager {
 	serialized() {
 		return {
 			fileType: FileType.SkillSequencePresets,
-			presets: this.presetLines.map(({ actions, job }) => actions.serialized()),
+			presets: this.presetLines.map(({ actions, job }) => ({ ...actions.serialized(), job })),
 		};
 	}
 
 	deserializeAndAppend(content: Fixme) {
 		for (const preset of content.presets) {
+			if (!(preset.job in JOBS)) throw new Error("Skill preset requires a current job key.");
 			const line = Line.deserialize(preset.actions);
 			line.name = preset.name;
-			const skillNames: ActionKey[] = line.actions.flatMap((action) =>
-				action.info.type === ActionType.Skill ? [action.info.skillName] : [],
-			);
-			this.addLine(line, preset.job ?? inferJobFromSkillNames(skillNames));
+			this.addLine(line, preset.job);
 		}
 	}
 

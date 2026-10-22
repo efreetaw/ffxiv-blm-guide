@@ -8,7 +8,8 @@
 // cannot be tested readily without writing proper tests.
 
 import React from "react";
-import fs from "node:fs";
+import { makeDefaultConfig } from "../Game/GameConfig";
+import { ProcMode } from "../Game/Common";
 import { ActionKey } from "../Game/Data";
 import { controller } from "../Controller/Controller";
 import { setCachedValue, ReplayMode, TickMode } from "../Controller/Common";
@@ -32,13 +33,7 @@ import {
 	ImportTimelineFile,
 } from "../Controller/UndoStack";
 
-const readFileToString = (relPath: string) => {
-	const absPath = "src/__test__/Asset/interactions/" + relPath;
-	return fs.readFileSync(absPath, "utf8");
-};
-
 // Slot 0: [blm] jump to 0, f3, b3, f3, b3, f3, b3
-const recordString0 = readFileToString("slot_0_blm.txt");
 const SLOT_0_INIT_ACTIONS = [
 	jumpToTimestampNode(0),
 	skillNode("FIRE_III"),
@@ -49,7 +44,6 @@ const SLOT_0_INIT_ACTIONS = [
 	skillNode("BLIZZARD_III"),
 ].map((it) => it.serialized());
 // Slot 1: [mch] wf and then a million ogcd spam
-const recordString1 = readFileToString("slot_1_mch.txt");
 const SLOT_1_INIT_ACTIONS = (
 	[
 		"WILDFIRE",
@@ -64,6 +58,19 @@ const SLOT_1_INIT_ACTIONS = (
 		"SPRINT",
 	] as ActionKey[]
 ).map((key) => skillNode(key).serialized());
+
+const recordString0 = JSON.stringify({
+	name: "editing test",
+	fileType: "Record",
+	config: { ...makeDefaultConfig("BLM"), ...{"level": 100, "wd": 152, "main": 5925, "spellSpeed": 840, "skillSpeed": 420, "criticalHit": 3456, "directHit": 1764, "determination": 1951, "piety": 440, "tenacity": 420, "countdown": 10, "randomSeed": "sup", "fps": 120, "gcdSkillCorrection": 0, "animationLock": 0.7, "timeTillFirstManaTick": 1.2}, procMode: ProcMode.Never },
+	actions: SLOT_0_INIT_ACTIONS,
+});
+const recordString1 = JSON.stringify({
+	name: "editing test",
+	fileType: "Record",
+	config: { ...makeDefaultConfig("MCH"), ...{"level": 100, "wd": 152, "main": 5925, "spellSpeed": 420, "skillSpeed": 420, "criticalHit": 3387, "directHit": 1935, "determination": 2407, "piety": 440, "tenacity": 420, "countdown": 0, "randomSeed": "sup", "fps": 120, "gcdSkillCorrection": 0, "animationLock": 0.7, "timeTillFirstManaTick": 1.2}, procMode: ProcMode.Never },
+	actions: SLOT_1_INIT_ACTIONS,
+});
 
 beforeEach(() => {
 	controller.setTimeControlSettings({

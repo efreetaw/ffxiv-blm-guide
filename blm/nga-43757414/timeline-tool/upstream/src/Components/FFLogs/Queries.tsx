@@ -798,17 +798,13 @@ export async function queryPlayerEvents(
 		// Run a second query to retrieve all buff events that target the player/debuff events
 		// that target a boss. This is deliberately run only if we have marker tracks for the
 		// encounter; strictly speaking we can separate them but I'm lazy about adding UI for it.
-		try {
-			const statusEvents = await queryPartyStatusEvents(params);
-			partyBuffMarkers = aggregatePartyBuffMarkers(
-				statusEvents,
-				params.playerID,
-				combatStartTime,
-				fight.endTime,
-			);
-		} catch (e) {
-			console.error("failed to query party status events for buff markers", e);
-		}
+		const statusEvents = await queryPartyStatusEvents(params);
+		partyBuffMarkers = aggregatePartyBuffMarkers(
+			statusEvents,
+			params.playerID,
+			combatStartTime,
+			fight.endTime,
+		);
 	}
 	const state: IntermediateLogImportState = {
 		playerName: name,

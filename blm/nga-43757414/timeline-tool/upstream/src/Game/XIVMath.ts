@@ -165,34 +165,6 @@ export class XIVMath {
 		return Math.floor(((100 - (speedModifier ?? 0)) * pts) / 1000) / 100;
 	}
 
-	// DO NOT USE except to support legacy timelines. Arguments are the same as for preTaxGcd
-	// this formula is rounded incorrectly, as a result when there is haste buff the resulting GCD
-	// may be inaccurate by up to 0.01s
-	static preTaxGcdLegacy(
-		level: LevelSync,
-		speed: number,
-		baseGCD: number,
-		speedModifier?: number,
-	) {
-		const subStat = this.getSubstatBase(level);
-		const div = this.getStatDiv(level);
-
-		return (
-			Math.floor(
-				(Math.floor(
-					(Math.floor(((100 - (speedModifier ?? 0)) * 100) / 100) *
-						Math.floor(
-							((2000 - Math.floor((130 * (speed - subStat)) / div + 1000)) *
-								(1000 * baseGCD)) /
-								10000,
-						)) /
-						100,
-				) *
-					100) /
-					100,
-			) / 100
-		);
-	}
 
 	/**
 	 * The pre-tax cast time of an action, given the player's current stats and base cast time

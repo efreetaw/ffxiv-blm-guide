@@ -4,7 +4,9 @@ import { controller } from "../Controller/Controller";
 import { ActionType, Line, Record as BattleRecord, SerializedAction } from "../Controller/Record";
 import { CURRENT_GAME_COMBAT_PATCH, getCachedValue, setCachedValue } from "../Controller/Common";
 import { ConfigData, GameConfig, makeDefaultConfig } from "../Game/GameConfig";
-import { ACTIONS, ActionKey } from "../Game/Data";
+import { ACTIONS, ActionKey, ResourceKey } from "../Game/Data";
+import { getAllResources } from "../Game/Resources";
+import standardSequence from "../../../examples/ledgers/standard.json";
 import { BLM_ACTIONS } from "../Game/Data/Jobs/BLM";
 import { createMockCanvas } from "./ImageExport";
 import { ColorTheme, getCurrentThemeColors, getThemeColors } from "./ColorTheme";
@@ -26,10 +28,7 @@ type SequenceInput = {
 if (!getCachedValue("language")) setCachedValue("language", "zh");
 
 export const BASELINE: SequenceInput = {
-	name: "攻略图1基准序列（13个GCD）",
-	config: { spellSpeed: 420, skillSpeed: 420, countdown: 0, fps: 60, animationLock: 0.7, randomSeed: "baseline", procMode: "Never" as ConfigData["procMode"] },
-	initialResources: { UMBRAL_ICE: 1, PARADOX: 1, FIRESTARTER: 1 },
-	actions: ["即刻", "冰3", "冰4", "U", "星灵移位", "火3", "火4×6", "A", "耀星", "绝望"],
+	...standardSequence as SequenceInput,
 	export: { wrapSeconds: 20, scale: 0.4, pixelRatio: 3, includeTime: true, theme: "Light" },
 };
 
@@ -49,7 +48,6 @@ const extra: { [key: string]: ActionKey } = {
 	冰悖论: "PARADOX", 火悖论: "PARADOX", 即刻: "SWIFTCAST", 昏乱: "ADDLE", 星灵移位: "TRANSPOSE", 移位: "TRANSPOSE", 三连: "TRIPLECAST", 黑魔纹: "LEY_LINES", 核: "FLARE", 耀: "FLARE_STAR",
 };
 for (const [alias, key] of Object.entries(extra)) aliases.set(alias.toLowerCase(), key);
-const resourceMax: { [key: string]: number } = { MANA: 10000, ASTRAL_FIRE: 3, UMBRAL_ICE: 3, UMBRAL_HEART: 3, ASTRAL_SOUL: 6, PARADOX: 1, FIRESTARTER: 1, THUNDERHEAD: 1, POLYGLOT: 3, TRIPLECAST: 3, SWIFTCAST: 1, LEY_LINES: 1 };
 
 function readInput(input: SequenceInput | string): SequenceInput {
 	if (typeof input !== "string") return input;
@@ -76,7 +74,7 @@ function normalizeActions(input: SequenceInput): SerializedAction[] {
 		if (!key) throw new Error(`未知黑魔技能：${name}。冰针是灵极心资源；获得3根冰针应填写冰4。`);
 		const count = repeated ? Number(repeated[2]) : 1;
 		if (count < 1 || count > 100) throw new Error("单项重复次数应为 1–100");
-		for (let i = 0; i < count; i++) actions.push({ type: ActionType.Skill, skillName: ACTIONS[key].name, targetList: typeof item === "string" ? [1] : item.targetList ?? [1], healTargetCount: undefined });
+		for (let i = 0; i < count; i++) actions.push({ ...(typeof item === "string" ? { targetList: [1], healTargetCount: undefined } : item), type: ActionType.Skill, skillName: ACTIONS[key].name });
 	}
 	if (actions.length > 500) throw new Error("每张图最多500个动作，请拆分长序列");
 	return actions;
@@ -90,14 +88,15 @@ function importSequence(raw: SequenceInput | string) {
 	if (!Number.isFinite(config.fps) || config.fps <= 0 || config.fps > 1000) throw new Error("FPS应为1–1000");
 	if (!Number.isFinite(config.countdown) || config.countdown < 0 || config.countdown > 60) throw new Error("倒计时应为0–60秒");
 	if (input.initialResources) config.initialResourceOverrides = Object.entries(input.initialResources).map(([type, stacks]) => {
-		if (!(type in resourceMax) || !Number.isInteger(stacks) || stacks < 0 || stacks > resourceMax[type]) throw new Error(`初始资源无效：${type}=${stacks}`);
-		return { type, stacks, timeTillFullOrDrop: type === "TRIPLECAST" ? 15.7 : type === "LEY_LINES" ? 20 : 30, effectOrTimerEnabled: true } as ConfigData["initialResourceOverrides"][number];
+		const info = getAllResources("BLM").get(type as ResourceKey);
+		if (!info || info.isCoolDown || !Number.isInteger(stacks) || stacks < 0 || stacks > info.maxValue) throw new Error(`初始资源无效：${type}=${stacks}`);
+		return { type: type as ResourceKey, stacks, timeTillFullOrDrop: info.maxTimeout, effectOrTimerEnabled: true };
 	});
 	if (config.initialResourceOverrides.some(x => x.type === "ASTRAL_FIRE" && x.stacks > 0) && config.initialResourceOverrides.some(x => x.type === "UMBRAL_ICE" && x.stacks > 0)) throw new Error("不能同时持有星极火和灵极冰");
 	const oldRecord = controller.record;
 	const oldConfig = controller.gameConfig;
 	try {
-		controller.gameConfig = new GameConfig(config);
+		controller.gameConfig = GameConfig.deserialize(config);
 		const record = new BattleRecord();
 		record.config = controller.gameConfig;
 		record.name = input.name ?? "自定义黑魔序列";

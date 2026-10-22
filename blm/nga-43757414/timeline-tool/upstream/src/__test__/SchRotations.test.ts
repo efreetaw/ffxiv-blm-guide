@@ -3,6 +3,7 @@ import {
 	rotationTestSetup,
 	rotationTestTeardown,
 	testDamageFromTimeline,
+	testRejectsTimeline,
 	makeTestWithConfigFn,
 	applySkill,
 	compareDamageTables,
@@ -170,21 +171,7 @@ it(
 	}),
 );
 
-it(
-	"does some heals",
-	testDamageFromTimeline("sch_misc_heals.txt", {
-		time: 48.95 + 2,
-		lastDamageApplicationTime: 48.515 + 2,
-		totalPotency: {
-			applied: 6280,
-			pending: 0,
-		},
-		gcdSkills: {
-			applied: 20,
-			pending: 0,
-		},
-	}),
-);
+it("rejects historical format: sch_misc_heals.txt", testRejectsTimeline("sch_misc_heals.txt"));
 
 it(
 	"snapshots chain strat on dots",

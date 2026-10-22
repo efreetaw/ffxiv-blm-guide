@@ -10,19 +10,14 @@
 //
 // A Record is a Line with an associated GameConfig, as well as information about currently-selected
 // actions.
-//
-// Prior to an internal refactor allowing the representation of invalid actions, Records were
-// represented as a wrapper around a linked list of ActionNodes. However, they were still
-// serialized as an array of { type, skillName?, buffName?, waitDuration? } objects; the new
-// implementation parses these objects to the contemporary Record format.
 
 import { FileType } from "./Common";
 import { BuffType, SkillReadyStatus, SkillUnavailableReason } from "../Game/Common";
 import { GameConfig, SerializedConfig } from "../Game/GameConfig";
 import { Potency, PotencyKind } from "../Game/Potency";
 import { controller } from "./Controller";
-import { ACTIONS, ActionKey, ResourceKey } from "../Game/Data";
-import { getNormalizedSkillName, getResourceKeyFromBuffName } from "../Game/Skills";
+import { ACTIONS, ActionKey, ResourceKey, RESOURCES } from "../Game/Data";
+import { getNormalizedSkillName } from "../Game/Skills";
 import { localize, localizeResourceType, localizeSkillName } from "../Components/Localization";
 
 export const enum ActionType {
@@ -38,14 +33,12 @@ export const enum ActionType {
 interface SerializedSkill {
 	type: ActionType.Skill;
 	skillName: string; // uses the VALUE of the skill name, not the ActionKey
-	// Legacy field: targetCount used to be present instead of targetList.
-	targetCount?: number;
-	targetList?: number[];
+	targetList: number[];
 	healTargetCount: number | undefined;
 }
 
 interface SerializedWait {
-	type: ActionType.Wait; // legacy name; represents a wait for a fixed duration
+	type: ActionType.Wait; // wait for a fixed duration
 	waitDuration: number;
 }
 
@@ -175,12 +168,6 @@ export class ActionNode {
 	#hotOverrideAmount: Map<ResourceKey, Map<number, number>>;
 	#hotTimeGap: Map<ResourceKey, Map<number, number>>;
 	info: NodeInfo;
-	// Older versions of xivintheshell attached waitDuration fields to every action
-	// this field is only populated during deserialization.
-	// Note that a value of 0 does have a meaning; if an action is created in manual mode
-	// and spacebar was not pressed to fast-forward, then a wait action performed immediately
-	// after will be relative to the end of the action rather than the end of the animation lock.
-	legacyWaitDuration?: number;
 
 	// timeline animation lock info set in the controller; should probably be moved
 	// elsewhere eventually
@@ -188,7 +175,7 @@ export class ActionNode {
 	tmp_endLockTime?: number;
 	tmp_invalid_reasons: SkillUnavailableReason[];
 
-	constructor(info: NodeInfo, legacyWaitDuration?: number) {
+	constructor(info: NodeInfo) {
 		this.info = info;
 		this.#capturedBuffs = new Set<BuffType>();
 		this.#dotPotencies = new Map();
@@ -197,7 +184,6 @@ export class ActionNode {
 		this.#dotTimeGap = new Map();
 		this.#hotOverrideAmount = new Map();
 		this.#hotTimeGap = new Map();
-		this.legacyWaitDuration = legacyWaitDuration;
 		this.tmp_invalid_reasons = [];
 	}
 
@@ -276,7 +262,7 @@ export class ActionNode {
 	}
 
 	getClone(): ActionNode {
-		return new ActionNode(this.info, this.legacyWaitDuration);
+		return new ActionNode(this.info);
 	}
 
 	get snapshotTime(): number | undefined {
@@ -653,65 +639,32 @@ export class Line {
 	}
 
 	static deserialize(serialized: SerializedLine): Line {
-		const actions = serialized.map((serializedAction) => {
-			// TODO ensure objects are well-formed and insert invalid nodes if not
-			if (serializedAction.type === ActionType.Skill) {
-				const skillName = getNormalizedSkillName(serializedAction.skillName);
-				const legacyWaitDuration =
-					"waitDuration" in serializedAction
-						? serializedAction["waitDuration"]
-						: undefined;
-				const targetList =
-					serializedAction.targetCount !== undefined
-						? Array(serializedAction.targetCount)
-								.fill(0)
-								.map((_, i) => i + 1)
-						: (serializedAction.targetList ?? [1]);
-				return new ActionNode(
-					skillName !== undefined
-						? {
-								type: ActionType.Skill,
-								skillName,
-								targetList,
-								healTargetCount: serializedAction.healTargetCount,
-							}
-						: {
-								type: ActionType.Unknown,
-								skillName: serializedAction.skillName,
-								targetList,
-								healTargetCount: serializedAction.healTargetCount,
-							},
-					// @ts-expect-error used for parsing legacy format
-					legacyWaitDuration,
-				);
-			} else if (serializedAction.type === ActionType.SetResourceEnabled) {
-				const legacyWaitDuration =
-					"waitDuration" in serializedAction
-						? serializedAction["waitDuration"]
-						: undefined;
-				return new ActionNode(
-					{
-						type: ActionType.SetResourceEnabled,
-						buffName: getResourceKeyFromBuffName(serializedAction.buffName)!,
-						// Newer versions require a targetNumber for toggling DoT effects
-						targetNumber: serializedAction.targetNumber ?? 1,
-					},
-					// @ts-expect-error used for parsing legacy format
-					legacyWaitDuration,
-				);
-			} else if (
-				serializedAction.type === ActionType.Wait ||
-				serializedAction.type === ActionType.JumpToTimestamp ||
-				serializedAction.type === ActionType.WaitForMP
-			) {
-				return new ActionNode(serializedAction);
-			} else {
-				window.alert("unparseable action: " + JSON.stringify(serializedAction));
-				return new ActionNode({ type: ActionType.Invalid });
-			}
-		});
 		const line = new Line();
-		line.actions = actions;
+		line.actions = serialized.map((action) => {
+			if ("targetCount" in action || (action.type !== ActionType.Wait && "waitDuration" in action)) {
+				throw new Error("Unsupported legacy action format: use targetList and explicit Wait actions.");
+			}
+			if (action.type === ActionType.Skill) {
+				if (!Array.isArray(action.targetList)) {
+					throw new Error("Skill action requires targetList.");
+				}
+				const skillName = getNormalizedSkillName(action.skillName);
+				return new ActionNode(skillName === undefined
+					? { ...action, type: ActionType.Unknown }
+					: { ...action, skillName });
+			}
+			if (action.type === ActionType.SetResourceEnabled) {
+				if (!(action.buffName in RESOURCES)) {
+					throw new Error(`Unknown resource key: ${action.buffName}`);
+				}
+				return new ActionNode({ ...action, buffName: action.buffName as ResourceKey });
+			}
+			if (action.type === ActionType.Wait || action.type === ActionType.JumpToTimestamp ||
+				action.type === ActionType.WaitForMP || action.type === ActionType.Invalid) {
+				return new ActionNode(action);
+			}
+			throw new Error("Unparseable action: " + JSON.stringify(action));
+		});
 		return line;
 	}
 }

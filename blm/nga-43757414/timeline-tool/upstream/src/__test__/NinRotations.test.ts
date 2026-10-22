@@ -6,6 +6,7 @@ import {
 	applySkill,
 	compareDamageTables,
 	testDamageFromTimeline,
+	testRejectsTimeline,
 } from "./utils";
 
 import { controller } from "../Controller/Controller";
@@ -376,24 +377,7 @@ it(
 	}),
 );
 
-it(
-	"fits expected gcds in kunai's bane in opener",
-	testDamageFromTimeline("nin_4th_gcd_opener.txt", {
-		time: 25.317 + 10,
-		lastDamageApplicationTime: 25.083 + 10,
-		totalPotency: {
-			applied: 17201.74,
-			pending: 1002.67,
-		},
-		gcdSkills: {
-			applied: 22,
-			pending: 1,
-		},
-		mainTableSummary: {
-			totalPotencyWithoutPot: 15999.39,
-		},
-	}),
-);
+it("rejects historical format: nin_4th_gcd_opener.txt", testRejectsTimeline("nin_4th_gcd_opener.txt"));
 
 it(
 	"computes proper falloff for aoe debuffs",
