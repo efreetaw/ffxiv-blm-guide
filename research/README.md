@@ -21,4 +21,6 @@ python3 research/limited-gcd/high_thunder.py --check
 
 第二题：[基准循环只打完1—13个GCD时，ΔP是多少？](limited-gcd/standard-cycle-cutoff.md)
 
+第三题：[核心1—13G的斩杀循环怎么选？](limited-gcd/execute-rotations.md)
+
 参考表：[单体特化循环：ΔGCD、ΔP与前置需求](limited-gcd/specialized-cycles.md)
