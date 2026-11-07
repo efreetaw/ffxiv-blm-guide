@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>不定GCD下的斩杀特化 · 视频画面</title>
+  <title>不定GCD下的截断特化 · 黑魔法师补充</title>
   <style>
     :root {
       --text: #f0f3fc;
@@ -26,7 +26,13 @@
     [hidden] { display: none !important; }
     .viewport { flex: none; width: calc(1920px * var(--scale)); height: calc(1080px * var(--scale)); }
     .canvas { position: relative; width: 1920px; height: 1080px; transform: scale(var(--scale)); transform-origin: top left; overflow: hidden; background: linear-gradient(112deg, #0a101a, #12152d); }
-    .chapter { position: absolute; inset: 0; }
+    .chapter, .home { position: absolute; inset: 0; }
+    .home { display: block; color: var(--text); text-decoration: none; }
+    .home img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .home-start { position: absolute; left: 410px; top: 778px; display: flex; align-items: center; gap: 48px; padding: 22px 36px; border: 1px solid #c7b5f080; border-radius: 999px; background: #111b36dc; font-size: 30px; letter-spacing: 3px; }
+    .home-start span { color: var(--purple); }
+    .home:hover .home-start, .home:focus-visible .home-start { border-color: var(--purple); background: #29243ee8; }
+    .home:focus-visible { outline-offset: -6px; }
     .chapter-nav, .controls { display: flex; flex: none; justify-content: center; flex-wrap: wrap; gap: 6px; max-width: 100%; }
     .chapter-nav a, .controls a { border: 1px solid #29374a; border-radius: 8px; background: #121b29; color: var(--muted); text-decoration: none; white-space: nowrap; }
     .chapter-nav a { display: flex; align-items: center; gap: 10px; padding: 11px 20px; font-size: 15px; }
@@ -38,215 +44,215 @@
     .scene { position: absolute; inset: 0; }
     .panel { border: 1px solid var(--line); border-radius: 26px; background: var(--panel); }
 
+    /* 第3节画面样式。 */
+    #chapter-3 .masthead { position: absolute; left: 96px; right: 96px; display: flex; justify-content: space-between; color: var(--muted); }
+    #chapter-3 .masthead { top: 56px; height: 63px; align-items: flex-start; justify-content: flex-end; border-bottom: 1px solid var(--line); font-size: 28px; }
+    #chapter-3 h1, #chapter-3 h2, #chapter-3 h3, #chapter-3 p { margin: 0; }
+    #chapter-3 .title { position: absolute; top: 146px; left: 96px; right: 96px; font-size: 72px; line-height: 1.25; font-weight: 700; }
+    #chapter-3 .icon { flex: none; width: 82px; height: 82px; border: 1px solid var(--line); border-radius: 9px; }
+    #chapter-3 .damage-band { position: absolute; top: 254px; left: 96px; right: 96px; height: 148px; padding: 28px 32px; display: flex; align-items: center; gap: 32px; }
+    #chapter-3 .damage-skill { flex: none; display: flex; align-items: center; gap: 24px; color: var(--purple); font-size: 40px; font-weight: 700; }
+    #chapter-3 .damage-skill small { display: block; margin-top: 8px; color: var(--muted); font-size: 25px; font-weight: 400; }
+    #chapter-3 .damage-track { flex: 1; height: 64px; display: flex; border-radius: 13px; overflow: hidden; background: var(--purple); }
+    #chapter-3 .direct { width: 19.73165%; display: grid; place-content: center; background: #8465d7; font-size: 30px; border-right: 2px solid #dfd4ff; white-space: nowrap; }
+    #chapter-3 .dot { flex: 1; display: grid; place-content: center; color: #1d1733; font-size: 32px; font-weight: 700; }
+    #chapter-3 .bar-total { flex: none; width: 172px; text-align: right; }
+    #chapter-3 .bar-total strong { font-size: 48px; }
+    #chapter-3 .bar-total span { display: block; margin-top: 8px; color: var(--muted); font-size: 26px; }
+    #chapter-3 .potency-chart { position: absolute; left: 96px; top: 416px; width: 1728px; height: 390px; overflow: visible; }
+    #chapter-3 .potency-chart text { font-family: inherit; }
+    #chapter-3 .conditions { position: absolute; bottom: 196px; left: 96px; right: 96px; height: 68px; display: grid; place-content: center; font-size: 30px; color: var(--muted); }
+    #chapter-3 .comparison { position: absolute; top: 270px; left: 96px; right: 96px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+    #chapter-3 .compare-card { height: 534px; position: relative; padding: 32px 42px; border-width: 2px; }
+    #chapter-3 .loss { color: var(--pink); background: #2e2030; }
+    #chapter-3 .gain { color: var(--green); background: #16372f; }
+    #chapter-3 .compare-card.loss { background: #281e30; border-color: var(--pink); }
+    #chapter-3 .compare-card.gain { background: #14322e; border-color: var(--green); }
+    #chapter-3 .compare-heading { display: flex; align-items: center; justify-content: space-between; }
+    #chapter-3 .compare-heading h2 { font-size: 46px; }
+    #chapter-3 .compare-heading span { font-size: 28px; color: var(--muted); }
+    #chapter-3 .compare-metric { margin-top: 32px; display: flex; justify-content: space-between; align-items: center; color: var(--text); }
+    #chapter-3 .big-power { font-size: 112px; line-height: 1.15; letter-spacing: -4px; }
+    #chapter-3 .metric-caption { color: var(--muted); font-size: 28px; margin-top: 20px; }
+    #chapter-3 .q-reference { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
+    #chapter-3 .q-reference strong { color: var(--orange); font-size: 46px; }
+    #chapter-3 .q-reference span { color: var(--muted); font-size: 28px; }
+    #chapter-3 .benefit { margin-top: 32px; display: flex; align-items: baseline; justify-content: space-between; }
+    #chapter-3 .benefit strong { font-size: 64px; }
+    #chapter-3 .benefit span { font-size: 32px; color: var(--muted); }
+    #chapter-3 .mini-gcd { position: absolute; bottom: 28px; left: 42px; display: flex; gap: 14px; margin: 0; padding: 0; list-style: none; }
+    #chapter-3 .mini-gcd li { width: 73px; height: 49px; display: grid; place-content: center; border: 1px solid var(--line); border-radius: 10px; background: #1a2738; color: var(--muted); font-size: 29px; }
+    #chapter-3 .mini-gcd li:first-child { color: var(--purple); border-color: var(--purple); font-size: 23px; }
+    #chapter-3 .mini-gcd li:last-child { color: inherit; border-color: currentColor; }
+    #chapter-3 .counting-note { position: absolute; bottom: 192px; left: 96px; right: 96px; text-align: center; font-size: 32px; color: var(--muted); }
+
+
     /* 第1节画面样式。 */
-    #chapter-1 .masthead { position: absolute; left: 96px; right: 96px; display: flex; justify-content: space-between; color: var(--muted); }
-    #chapter-1 .masthead { top: 56px; height: 63px; align-items: flex-start; justify-content: flex-end; border-bottom: 1px solid var(--line); font-size: 28px; }
+    #chapter-1 .masthead { position: absolute; left: 96px; right: 96px; display: flex; color: var(--muted); }
+    #chapter-1 .masthead { top: 56px; height: 63px; justify-content: flex-end; border-bottom: 1px solid var(--line); font-size: 28px; }
     #chapter-1 h1, #chapter-1 h2, #chapter-1 p { margin: 0; }
     #chapter-1 .title { position: absolute; top: 146px; left: 96px; right: 96px; font-size: 72px; line-height: 1.25; font-weight: 700; }
-    #chapter-1 .icon { flex: none; width: 82px; height: 82px; border: 1px solid var(--line); border-radius: 9px; }
-    #chapter-1 .damage-band { position: absolute; top: 254px; left: 96px; right: 96px; height: 148px; padding: 28px 32px; display: flex; align-items: center; gap: 32px; }
-    #chapter-1 .damage-skill { flex: none; display: flex; align-items: center; gap: 24px; color: var(--purple); font-size: 40px; font-weight: 700; }
-    #chapter-1 .damage-skill small { display: block; margin-top: 8px; color: var(--muted); font-size: 25px; font-weight: 400; }
-    #chapter-1 .damage-track { flex: 1; height: 64px; display: flex; border-radius: 13px; overflow: hidden; background: var(--purple); }
-    #chapter-1 .direct { width: 19.73165%; display: grid; place-content: center; background: #8465d7; font-size: 30px; border-right: 2px solid #dfd4ff; white-space: nowrap; }
-    #chapter-1 .dot { flex: 1; display: grid; place-content: center; color: #1d1733; font-size: 32px; font-weight: 700; }
-    #chapter-1 .bar-total { flex: none; width: 172px; text-align: right; }
-    #chapter-1 .bar-total strong { font-size: 48px; }
-    #chapter-1 .bar-total span { display: block; margin-top: 8px; color: var(--muted); font-size: 26px; }
-    #chapter-1 .potency-chart { position: absolute; left: 96px; top: 416px; width: 1728px; height: 390px; overflow: visible; }
-    #chapter-1 .potency-chart text { font-family: inherit; }
-    #chapter-1 .conditions { position: absolute; bottom: 196px; left: 96px; right: 96px; height: 68px; display: grid; place-content: center; font-size: 30px; color: var(--muted); }
-    #chapter-1 .comparison { position: absolute; top: 270px; left: 96px; right: 96px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
-    #chapter-1 .compare-card { height: 534px; position: relative; padding: 32px 42px; border-width: 2px; }
-    #chapter-1 .loss { color: var(--pink); background: #2e2030; }
-    #chapter-1 .gain { color: var(--green); background: #16372f; }
-    #chapter-1 .compare-card.loss { background: #281e30; border-color: var(--pink); }
-    #chapter-1 .compare-card.gain { background: #14322e; border-color: var(--green); }
-    #chapter-1 .compare-heading { display: flex; align-items: center; justify-content: space-between; }
-    #chapter-1 .compare-heading h2 { font-size: 46px; }
-    #chapter-1 .compare-heading span { font-size: 28px; color: var(--muted); }
-    #chapter-1 .compare-metric { margin-top: 32px; display: flex; justify-content: space-between; align-items: center; color: var(--text); }
-    #chapter-1 .big-power { font-size: 112px; line-height: 1.15; letter-spacing: -4px; }
-    #chapter-1 .metric-caption { color: var(--muted); font-size: 28px; margin-top: 20px; }
-    #chapter-1 .q-reference { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; }
-    #chapter-1 .q-reference strong { color: var(--orange); font-size: 46px; }
-    #chapter-1 .q-reference span { color: var(--muted); font-size: 28px; }
-    #chapter-1 .benefit { margin-top: 32px; display: flex; align-items: baseline; justify-content: space-between; }
-    #chapter-1 .benefit strong { font-size: 64px; }
-    #chapter-1 .benefit span { font-size: 32px; color: var(--muted); }
-    #chapter-1 .mini-gcd { position: absolute; bottom: 28px; left: 42px; display: flex; gap: 14px; margin: 0; padding: 0; list-style: none; }
-    #chapter-1 .mini-gcd li { width: 73px; height: 49px; display: grid; place-content: center; border: 1px solid var(--line); border-radius: 10px; background: #1a2738; color: var(--muted); font-size: 29px; }
-    #chapter-1 .mini-gcd li:first-child { color: var(--purple); border-color: var(--purple); font-size: 23px; }
-    #chapter-1 .mini-gcd li:last-child { color: inherit; border-color: currentColor; }
-    #chapter-1 .counting-note { position: absolute; bottom: 192px; left: 96px; right: 96px; text-align: center; font-size: 32px; color: var(--muted); }
+    #chapter-1 .purple { color: var(--purple); }
+    #chapter-1 .muted { color: var(--muted); }
+    #chapter-1 .sequence { margin: 0; padding: 0; display: grid; grid-template-columns: repeat(13, 1fr); gap: 12px; list-style: none; }
+    #chapter-1 .skill-card { height: 200px; padding: 10px 6px 16px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; border: 1px solid currentColor; border-radius: 18px; background: #192438; color: var(--purple); }
+    #chapter-1 .skill-card.fire { color: var(--orange); }
+    #chapter-1 .skill-card.finish { color: var(--green); }
+    #chapter-1 .skill-index { font-size: 28px; color: var(--muted); }
+    #chapter-1 .skill-card img { width: 58px; height: 58px; border: 1px solid var(--line); border-radius: 8px; }
+    #chapter-1 .skill-card strong { font-size: 28px; white-space: nowrap; }
+    #chapter-1 .cycle-badge { position: absolute; top: 268px; left: 96px; padding: 10px 36px; border-radius: 40px; background: #202a3d; color: var(--purple); font-size: 36px; font-weight: 700; }
+    #chapter-1 .cycle-note { position: absolute; top: 284px; right: 96px; color: var(--muted); font-size: 28px; }
+    #chapter-1 .cutoff-row { position: absolute; top: 446px; left: 116px; right: 152px; }
+    #chapter-1 .cutoff-row .skill-card:nth-child(n+5) { opacity: .28; }
+    #chapter-1 .cutoff-marker { position: absolute; left: 506px; top: -28px; height: 296px; border-left: 3px dashed var(--pink); }
+    #chapter-1 .cutoff-marker span { position: absolute; top: -65px; left: -116px; width: 230px; padding: 10px 0; text-align: center; border-radius: 40px; background: #392336; color: var(--pink); font-size: 32px; font-weight: 700; }
+    #chapter-1 .range-lines { position: absolute; top: 680px; left: 116px; right: 152px; display: flex; gap: 28px; text-align: center; font-size: 32px; }
+    #chapter-1 .range-lines span { padding-top: 12px; border-top: 3px solid currentColor; }
+    #chapter-1 .done-range { width: 494px; color: var(--purple); font-weight: 700; }
+    #chapter-1 .remaining-range { flex: 1; color: #788aa7; }
+    #chapter-1 .formula { position: absolute; top: 263px; left: 96px; right: 96px; height: 154px; padding: 16px 36px; }
+    #chapter-1 .formula h2 { color: var(--purple); font-size: 52px; }
+    #chapter-1 .formula p { margin-top: 15px; font-size: 38px; }
+    #chapter-1 .formula-label { position: absolute; top: 34px; right: 36px; color: var(--muted); font-size: 32px; }
+    #chapter-1 .curve { position: absolute; top: 454px; left: 96px; width: 1728px; height: 400px; overflow: visible; }
+    #chapter-1 .curve text { font-family: inherit; }
+    #chapter-1 .curve-caption { position: absolute; top: 870px; left: 96px; right: 96px; text-align: center; color: var(--muted); font-size: 30px; }
+    #chapter-1 .mana-intro { position: absolute; top: 263px; left: 96px; right: 96px; height: 154px; padding: 24px 36px; display: flex; align-items: center; gap: 40px; }
+    #chapter-1 .mana-trigger { flex: none; display: flex; align-items: center; gap: 20px; }
+    #chapter-1 .mana-trigger img { width: 72px; height: 72px; border-radius: 9px; }
+    #chapter-1 .mana-trigger strong { display: block; color: var(--purple); font-size: 38px; }
+    #chapter-1 .mana-trigger span { display: block; margin-top: 8px; color: var(--muted); font-size: 26px; }
+    #chapter-1 .mana-sequence h2 { font-size: 38px; }
+    #chapter-1 .mana-sequence p { margin-top: 14px; color: var(--muted); font-size: 32px; }
+    #chapter-1 .mana-gain { color: var(--green); }
 
 
     /* 第2节画面样式。 */
-    #chapter-2 .masthead { position: absolute; left: 96px; right: 96px; display: flex; color: var(--muted); }
-    #chapter-2 .masthead { top: 56px; height: 63px; justify-content: flex-end; border-bottom: 1px solid var(--line); font-size: 28px; }
-    #chapter-2 h1, #chapter-2 h2, #chapter-2 p { margin: 0; }
-    #chapter-2 .title { position: absolute; top: 146px; left: 96px; right: 96px; font-size: 72px; line-height: 1.25; font-weight: 700; }
-    #chapter-2 .purple { color: var(--purple); }
+    #chapter-2 .masthead { position: absolute; top: 56px; left: 96px; right: 96px; height: 63px; display: flex; justify-content: flex-end; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 28px; }
+    #chapter-2 h1, #chapter-2 h2, #chapter-2 h3, #chapter-2 p { margin: 0; }
+    #chapter-2 .title { position: absolute; top: 146px; left: 96px; right: 96px; font-size: 72px; line-height: 1.25; }
+    #chapter-2 .green, .thunder-page .green { color: var(--green); }
+    #chapter-2 .pink, .thunder-page .pink { color: var(--pink); }
+    #chapter-2 .purple, .thunder-page .purple { color: var(--purple); }
     #chapter-2 .muted { color: var(--muted); }
-    #chapter-2 .sequence { margin: 0; padding: 0; display: grid; grid-template-columns: repeat(13, 1fr); gap: 12px; list-style: none; }
-    #chapter-2 .skill-card { height: 200px; padding: 10px 6px 16px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; border: 1px solid currentColor; border-radius: 18px; background: #192438; color: var(--purple); }
-    #chapter-2 .skill-card.fire { color: var(--orange); }
-    #chapter-2 .skill-card.finish { color: var(--green); }
-    #chapter-2 .skill-index { font-size: 28px; color: var(--muted); }
-    #chapter-2 .skill-card img { width: 58px; height: 58px; border: 1px solid var(--line); border-radius: 8px; }
-    #chapter-2 .skill-card strong { font-size: 28px; white-space: nowrap; }
-    #chapter-2 .cycle-badge { position: absolute; top: 268px; left: 96px; padding: 10px 36px; border-radius: 40px; background: #202a3d; color: var(--purple); font-size: 36px; font-weight: 700; }
-    #chapter-2 .cycle-note { position: absolute; top: 284px; right: 96px; color: var(--muted); font-size: 28px; }
-    #chapter-2 .cutoff-row { position: absolute; top: 446px; left: 116px; right: 152px; }
-    #chapter-2 .cutoff-row .skill-card:nth-child(n+5) { opacity: .28; }
-    #chapter-2 .cutoff-marker { position: absolute; left: 506px; top: -28px; height: 296px; border-left: 3px dashed var(--pink); }
-    #chapter-2 .cutoff-marker span { position: absolute; top: -65px; left: -116px; width: 230px; padding: 10px 0; text-align: center; border-radius: 40px; background: #392336; color: var(--pink); font-size: 32px; font-weight: 700; }
-    #chapter-2 .range-lines { position: absolute; top: 680px; left: 116px; right: 152px; display: flex; gap: 28px; text-align: center; font-size: 32px; }
-    #chapter-2 .range-lines span { padding-top: 12px; border-top: 3px solid currentColor; }
-    #chapter-2 .done-range { width: 494px; color: var(--purple); font-weight: 700; }
-    #chapter-2 .remaining-range { flex: 1; color: #788aa7; }
-    #chapter-2 .formula { position: absolute; top: 263px; left: 96px; right: 96px; height: 154px; padding: 16px 36px; }
-    #chapter-2 .formula h2 { color: var(--purple); font-size: 52px; }
-    #chapter-2 .formula p { margin-top: 15px; font-size: 38px; }
-    #chapter-2 .formula-label { position: absolute; top: 34px; right: 36px; color: var(--muted); font-size: 32px; }
-    #chapter-2 .curve { position: absolute; top: 454px; left: 96px; width: 1728px; height: 400px; overflow: visible; }
-    #chapter-2 .curve text { font-family: inherit; }
-    #chapter-2 .curve-caption { position: absolute; top: 870px; left: 96px; right: 96px; text-align: center; color: var(--muted); font-size: 30px; }
-    #chapter-2 .mana-intro { position: absolute; top: 263px; left: 96px; right: 96px; height: 154px; padding: 24px 36px; display: flex; align-items: center; gap: 40px; }
-    #chapter-2 .mana-trigger { flex: none; display: flex; align-items: center; gap: 20px; }
-    #chapter-2 .mana-trigger img { width: 72px; height: 72px; border-radius: 9px; }
-    #chapter-2 .mana-trigger strong { display: block; color: var(--purple); font-size: 38px; }
-    #chapter-2 .mana-trigger span { display: block; margin-top: 8px; color: var(--muted); font-size: 26px; }
-    #chapter-2 .mana-sequence h2 { font-size: 38px; }
-    #chapter-2 .mana-sequence p { margin-top: 14px; color: var(--muted); font-size: 32px; }
-    #chapter-2 .mana-gain { color: var(--green); }
-
-
-    /* 第3节画面样式。 */
-    #chapter-3 .masthead { position: absolute; top: 56px; left: 96px; right: 96px; height: 63px; display: flex; justify-content: flex-end; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 28px; }
-    #chapter-3 h1, #chapter-3 h2, #chapter-3 h3, #chapter-3 p { margin: 0; }
-    #chapter-3 .title { position: absolute; top: 146px; left: 96px; right: 96px; font-size: 72px; line-height: 1.25; }
-    #chapter-3 .green { color: var(--green); }
-    #chapter-3 .pink { color: var(--pink); }
-    #chapter-3 .purple { color: var(--purple); }
-    #chapter-3 .muted { color: var(--muted); }
-    #chapter-3 .sequence { --slots: 13; margin: 0 auto; padding: 0; width: min(100%, calc(var(--slots) * 166px + (var(--slots) - 1) * 12px)); display: grid; grid-template-columns: repeat(var(--slots), minmax(0, 1fr)); gap: 12px; list-style: none; }
-    #chapter-3 .skill-card { position: relative; min-width: 0; height: 180px; padding: 12px 6px 16px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; border: 1px solid currentColor; border-radius: 16px; background: #192438; color: var(--purple); }
-    #chapter-3 .skill-card.fire { color: var(--orange); }
-    #chapter-3 .skill-card.finish { color: var(--green); background: #142e2d; }
-    #chapter-3 .skill-card.thunder { color: #e5bdff; background: #29203c; }
-    #chapter-3 .skill-card.xeno { color: #88c6ff; background: #152d41; }
-    #chapter-3 .skill-card img { width: 62px; height: 62px; border-radius: 8px; }
-    #chapter-3 .skill-card strong { font-size: 26px; white-space: nowrap; }
-    #chapter-3 .skill-index { color: var(--muted); font-size: 26px; }
-    #chapter-3 .skill-card.faded { opacity: .22; }
-    #chapter-3 .skill-card.empty { border: 1px dashed var(--line); background: transparent; }
-    #chapter-3 .shift { position: absolute; top: -44px; left: -54px; z-index: 1; width: 108px; padding: 5px 0; border: 1px solid #536080; border-radius: 8px; background: #20263b; color: var(--muted); font-size: 20px; text-align: center; }
-    #chapter-3 .opening { position: absolute; top: 276px; left: 96px; right: 96px; }
-    #chapter-3 .opening-block + .opening-block { margin-top: 40px; }
-    #chapter-3 .row-heading { height: 40px; display: flex; align-items: center; gap: 24px; font-size: 34px; }
-    #chapter-3 .row-heading span { color: var(--muted); font-size: 26px; }
-    #chapter-3 .opening .sequence { margin-top: 52px; }
-    #chapter-3 .deadline { position: absolute; top: 88px; bottom: 0; left: calc((100% + 12px) * 8 / 13 - 6px); border-left: 3px dashed var(--pink); }
-    #chapter-3 .deadline span { position: absolute; top: -50px; left: -104px; width: 208px; padding: 8px 0; border-radius: 40px; background: #392336; color: var(--pink); font-size: 28px; font-weight: 700; text-align: center; }
-    #chapter-3 .operator { color: var(--muted); font-size: 48px; }
-    #chapter-3 .route-table-wrap { position: absolute; top: 260px; left: 96px; right: 96px; overflow: hidden; }
-    #chapter-3 .route-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 25px; line-height: 28px; }
-    #chapter-3 .route-table thead { background: #252840; color: var(--purple); }
-    #chapter-3 .route-table thead th { height: 44px; padding: 8px 12px; font-size: 26px; text-align: left; }
-    #chapter-3 .route-table tbody th, #chapter-3 .route-table tbody td { height: 34px; padding: 2px 12px; border-top: 1px solid var(--line); white-space: nowrap; }
-    #chapter-3 .route-table tbody th[scope="row"] { color: var(--purple); font-size: 26px; }
-    #chapter-3 .route-table tbody tr:nth-child(even) { background: #1b2536; }
-    #chapter-3 .route-table .group-start > * { border-top: 2px solid #6e648d; }
-    #chapter-3 .route-table thead th:nth-child(-n+3), #chapter-3 .route-table .total-g { text-align: center; }
-    #chapter-3 .route-table tr > :nth-last-child(-n+2) { text-align: right; }
-    #chapter-3 .route-table .family-label { border-right: 1px solid var(--line); background: #22283a; color: var(--orange); text-align: center; vertical-align: middle; }
-    #chapter-3 .route-table .family-label.b4 { background: #17322e; color: var(--green); }
-    #chapter-3 .route-table .family-label.standard { background: #29263d; color: var(--purple); }
-    #chapter-3 .family-label strong { display: block; font-size: 25px; }
-    #chapter-3 .family-label span { display: block; margin-top: 10px; color: var(--muted); font-size: 22px; font-weight: 400; }
-    #chapter-3 .route-table-key { position: absolute; top: 902px; left: 96px; right: 96px; color: var(--muted); font-size: 24px; line-height: 32px; }
-    #chapter-3 .gcd-buttons { position: absolute; top: 332px; left: 96px; right: 96px; display: flex; align-items: center; gap: 14px; }
-    #chapter-3 .choice-label { margin-right: 16px; color: var(--muted); font-size: 28px; }
-    #chapter-3 .gcd-buttons button { min-width: 94px; height: 62px; padding: 8px 20px; border: 1px solid #43516b; border-radius: 12px; background: #131d2c; color: var(--muted); font-size: 30px; }
-    #chapter-3 .gcd-buttons button[aria-pressed="true"] { border-color: var(--purple); background: #302844; color: var(--text); }
-    #chapter-3 #long-buttons { top: 278px; }
-    #chapter-3 .route { position: absolute; top: 420px; left: 96px; right: 96px; }
-    #chapter-3 .route-hint { position: absolute; top: 626px; left: 96px; right: 96px; color: var(--muted); font-size: 30px; text-align: center; }
-    #chapter-3 .stats { position: absolute; top: 690px; left: 96px; right: 96px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-    #chapter-3 .stat { height: 164px; padding: 24px 30px; }
-    #chapter-3 .stat h2 { color: var(--muted); font-size: 27px; font-weight: 400; }
-    #chapter-3 .stat strong { display: block; margin-top: 16px; font-size: 62px; line-height: 1; }
-    #chapter-3 .route-note { position: absolute; top: 900px; left: 96px; right: 96px; color: var(--muted); font-size: 28px; line-height: 1.5; text-align: center; }
-    #chapter-3 .diagram-page .gcd-buttons { top: 272px; gap: 12px; }
-    #chapter-3 .diagram-page .gcd-buttons button { min-width: 82px; height: 56px; padding: 8px 16px; font-size: 28px; }
-    #chapter-3 .diagram { --columns: 7; --node-gap: 24px; --node-height: 230px; position: absolute; top: 366px; left: 96px; right: 96px; }
-    #chapter-3 .flow-row { display: grid; grid-template-columns: repeat(var(--columns), minmax(0, 1fr)); gap: var(--node-gap); }
-    #chapter-3 .flow-row + .flow-row { margin-top: var(--row-gap, 74px); }
-    #chapter-3 .flow-node { position: relative; height: var(--node-height); border: 2px solid #7e9eca; border-radius: 18px; background: #15263c; color: var(--text); text-align: center; }
-    #chapter-3 .flow-node:not(:last-child)::after { content: '→'; position: absolute; top: calc(50% - 23px); right: calc(-1 * var(--node-gap) - 2px); width: var(--node-gap); color: #8c9bb4; font-size: 34px; font-weight: 400; }
-    #chapter-3 .flow-node.ability { border-color: #778296; background: #1c2330; }
-    #chapter-3 .flow-node.variable { border-color: #d9ac68; background: #302719; }
-    #chapter-3 .flow-node.optional { border-style: dashed; }
-    #chapter-3 .flow-node.finish { border-color: var(--green); background: #17322e; }
-    #chapter-3 .flow-node.past { opacity: .6; }
-    #chapter-3 .flow-node.omitted { opacity: .3; }
-    #chapter-3 .flow-tag { position: absolute; top: 17px; left: 8px; right: 8px; color: #aec3df; font-size: 22px; }
-    #chapter-3 .variable .flow-tag { color: #e8bd7c; }
-    #chapter-3 .ability .flow-tag { color: var(--muted); }
-    #chapter-3 .flow-icons { position: absolute; top: 58px; left: 12px; right: 12px; height: 68px; display: flex; align-items: center; justify-content: center; gap: 12px; }
-    #chapter-3 .flow-icons img { width: 68px; height: 68px; border-radius: 7px; }
-    #chapter-3 .flow-icons.group img { width: 50px; height: 50px; }
-    #chapter-3 .flow-icons.group { gap: 7px; }
-    #chapter-3 .flow-icons span { color: var(--muted); font-size: 28px; }
-    #chapter-3 .flow-label { position: absolute; top: 140px; left: 8px; right: 8px; font-size: 30px; line-height: 38px; white-space: nowrap; }
-    #chapter-3 .flow-icons.group + .flow-label { font-size: 28px; }
-    #chapter-3 .flow-detail { position: absolute; bottom: 20px; left: 8px; right: 8px; color: var(--muted); font-size: 22px; line-height: 26px; white-space: nowrap; }
-    #chapter-3 .flow-turn { position: absolute; left: 0; width: 100%; height: var(--row-gap, 74px); overflow: visible; }
-    #chapter-3 .short-diagram .flow-node.omitted { opacity: .18; }
-    #chapter-3 .medium-diagram .diagram { top: 426px; --columns: 8; --node-height: 210px; --row-gap: 64px; }
-    #chapter-3 .medium-diagram .flow-tag { top: 14px; font-size: 21px; }
-    #chapter-3 .medium-diagram .flow-icons { top: 54px; height: 54px; }
-    #chapter-3 .medium-diagram .flow-icons img { width: 54px; height: 54px; }
-    #chapter-3 .medium-diagram .flow-icons.group { gap: 3px; }
-    #chapter-3 .medium-diagram .flow-icons.group img { width: 42px; height: 42px; }
-    #chapter-3 .medium-diagram .flow-icons.group span { font-size: 16px; }
-    #chapter-3 .medium-diagram .flow-label { top: 128px; font-size: 27px; line-height: 34px; }
-    #chapter-3 .medium-diagram .flow-detail { bottom: 18px; font-size: 19px; line-height: 24px; }
-    #chapter-3 .medium-diagram .flow-node:not(:last-child)::after { font-size: 28px; }
-    #chapter-3 .medium-diagram .branch-buttons { top: 344px; }
-    #chapter-3 .medium-diagram .branch-buttons button { height: 50px; font-size: 26px; }
-    #chapter-3 .medium-diagram .branch-buttons button[aria-pressed="true"] { border-color: var(--green); background: #17322e; }
-    #chapter-3 .diagram-page .stats { top: 950px; display: flex; justify-content: space-between; gap: 16px; }
-    #chapter-3 .diagram-page .stat { height: auto; padding: 0; display: flex; align-items: center; gap: 18px; border: 0; border-radius: 0; background: none; }
-    #chapter-3 .diagram-page .stat h2 { font-size: 24px; }
-    #chapter-3 .diagram-page .stat strong { margin: 0; font-size: 36px; white-space: nowrap; }
-    #chapter-3 .comparison .gcd-buttons { top: 278px; gap: 10px; }
-    #chapter-3 .comparison .gcd-buttons button { min-width: 72px; padding: 8px 14px; }
-    #chapter-3 .comparison .choice-label { margin-right: 8px; }
-    #chapter-3 .comparison-chart { position: absolute; top: 366px; left: 96px; width: 1110px; height: 378px; overflow: visible; }
-    #chapter-3 .comparison-chart text { font-family: inherit; }
-    #chapter-3 .comparison-result { position: absolute; top: 366px; right: 96px; width: 574px; height: 376px; padding: 22px; }
-    #chapter-3 .comparison-result h2 { font-size: 34px; }
-    #chapter-3 .comparison-result h2 span { float: right; padding-top: 8px; color: var(--muted); font-size: 24px; font-weight: 400; }
-    #chapter-3 .comparison-options { display: flex; gap: 8px; margin-top: 10px; }
-    #chapter-3 .comparison-options button { padding: 4px 8px; border: 1px solid #43516b; border-radius: 8px; background: #131d2c; color: var(--muted); font-size: 20px; white-space: nowrap; }
-    #chapter-3 .comparison-options button[aria-pressed="true"] { border-color: var(--green); background: #17322e; color: var(--text); }
-    #chapter-3 .comparison-row { margin-top: 12px; display: flex; align-items: baseline; justify-content: space-between; color: var(--muted); font-size: 26px; }
-    #chapter-3 .comparison-row b { color: var(--text); font-size: 34px; }
-    #chapter-3 .comparison-row small { font-size: 24px; }
-    #chapter-3 .comparison-gain { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); display: flex; align-items: baseline; justify-content: space-between; }
-    #chapter-3 .comparison-gain span { color: var(--muted); font-size: 26px; }
-    #chapter-3 .comparison-gain strong { color: var(--green); font-size: 54px; line-height: 1; }
-    #chapter-3 .comparison-result > p { margin-top: 10px; color: var(--muted); font-size: 21px; }
-    #chapter-3 .compare-strips { position: absolute; top: 784px; left: 96px; right: 96px; display: grid; gap: 14px; }
-    #chapter-3 .compare-strip { height: 92px; display: grid; grid-template-columns: 190px 1fr; align-items: center; }
-    #chapter-3 .compare-strip h3 { font-size: 26px; }
-    #chapter-3 .compare-strip .sequence { margin-left: 0; width: min(100%, calc(var(--slots) * 110px + (var(--slots) - 1) * 8px)); gap: 8px; }
-    #chapter-3 .compare-strip .skill-card { height: 92px; padding: 10px 4px; border-radius: 10px; }
-    #chapter-3 .compare-strip .skill-card img { width: 38px; height: 38px; }
-    #chapter-3 .compare-strip .skill-card strong { font-size: 21px; }
-    #chapter-3 .compare-strip .skill-index { display: none; }
+    #chapter-2 .sequence, .thunder-page .sequence { --slots: 13; margin: 0 auto; padding: 0; width: min(100%, calc(var(--slots) * 166px + (var(--slots) - 1) * 12px)); display: grid; grid-template-columns: repeat(var(--slots), minmax(0, 1fr)); gap: 12px; list-style: none; }
+    #chapter-2 .skill-card, .thunder-page .skill-card { position: relative; min-width: 0; height: 180px; padding: 12px 6px 16px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; border: 1px solid currentColor; border-radius: 16px; background: #192438; color: var(--purple); }
+    #chapter-2 .skill-card.fire, .thunder-page .skill-card.fire { color: var(--orange); }
+    #chapter-2 .skill-card.finish, .thunder-page .skill-card.finish { color: var(--green); background: #142e2d; }
+    #chapter-2 .skill-card.thunder, .thunder-page .skill-card.thunder { color: #e5bdff; background: #29203c; }
+    #chapter-2 .skill-card.xeno, .thunder-page .skill-card.xeno { color: #88c6ff; background: #152d41; }
+    #chapter-2 .skill-card img, .thunder-page .skill-card img { width: 62px; height: 62px; border-radius: 8px; }
+    #chapter-2 .skill-card strong, .thunder-page .skill-card strong { font-size: 26px; white-space: nowrap; }
+    #chapter-2 .skill-index, .thunder-page .skill-index { color: var(--muted); font-size: 26px; }
+    #chapter-2 .skill-card.faded { opacity: .22; }
+    #chapter-2 .skill-card.empty { border: 1px dashed var(--line); background: transparent; }
+    #chapter-2 .shift { position: absolute; top: -44px; left: -54px; z-index: 1; width: 108px; padding: 5px 0; border: 1px solid #536080; border-radius: 8px; background: #20263b; color: var(--muted); font-size: 20px; text-align: center; }
+    #chapter-2 .opening { position: absolute; top: 276px; left: 96px; right: 96px; }
+    #chapter-2 .opening-block + .opening-block { margin-top: 40px; }
+    #chapter-2 .row-heading { height: 40px; display: flex; align-items: center; gap: 24px; font-size: 34px; }
+    #chapter-2 .row-heading span { color: var(--muted); font-size: 26px; }
+    #chapter-2 .opening .sequence { margin-top: 52px; }
+    #chapter-2 .deadline { position: absolute; top: 88px; bottom: 0; left: calc((100% + 12px) * 8 / 13 - 6px); border-left: 3px dashed var(--pink); }
+    #chapter-2 .deadline span { position: absolute; top: -50px; left: -104px; width: 208px; padding: 8px 0; border-radius: 40px; background: #392336; color: var(--pink); font-size: 28px; font-weight: 700; text-align: center; }
+    #chapter-2 .operator, .thunder-page .operator { color: var(--muted); font-size: 48px; }
+    #chapter-2 .route-table-wrap { position: absolute; top: 260px; left: 96px; right: 96px; overflow: hidden; }
+    #chapter-2 .route-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 25px; line-height: 28px; }
+    #chapter-2 .route-table thead { background: #252840; color: var(--purple); }
+    #chapter-2 .route-table thead th { height: 44px; padding: 8px 12px; font-size: 26px; text-align: left; }
+    #chapter-2 .route-table tbody th, #chapter-2 .route-table tbody td { height: 34px; padding: 2px 12px; border-top: 1px solid var(--line); white-space: nowrap; }
+    #chapter-2 .route-table tbody th[scope="row"] { color: var(--purple); font-size: 26px; }
+    #chapter-2 .route-table tbody tr:nth-child(even) { background: #1b2536; }
+    #chapter-2 .route-table .group-start > * { border-top: 2px solid #6e648d; }
+    #chapter-2 .route-table thead th:nth-child(-n+3), #chapter-2 .route-table .total-g { text-align: center; }
+    #chapter-2 .route-table tr > :nth-last-child(-n+2) { text-align: right; }
+    #chapter-2 .route-table .family-label { border-right: 1px solid var(--line); background: #22283a; color: var(--orange); text-align: center; vertical-align: middle; }
+    #chapter-2 .route-table .family-label.b4 { background: #17322e; color: var(--green); }
+    #chapter-2 .route-table .family-label.standard { background: #29263d; color: var(--purple); }
+    #chapter-2 .family-label strong { display: block; font-size: 25px; }
+    #chapter-2 .family-label span { display: block; margin-top: 10px; color: var(--muted); font-size: 22px; font-weight: 400; }
+    #chapter-2 .route-table-key { position: absolute; top: 902px; left: 96px; right: 96px; color: var(--muted); font-size: 24px; line-height: 32px; }
+    #chapter-2 .gcd-buttons, .thunder-page .gcd-buttons { position: absolute; top: 332px; left: 96px; right: 96px; display: flex; align-items: center; gap: 14px; }
+    #chapter-2 .choice-label, .thunder-page .choice-label { margin-right: 16px; color: var(--muted); font-size: 28px; }
+    #chapter-2 .gcd-buttons button, .thunder-page .gcd-buttons button { min-width: 94px; height: 62px; padding: 8px 20px; border: 1px solid #43516b; border-radius: 12px; background: #131d2c; color: var(--muted); font-size: 30px; }
+    #chapter-2 .gcd-buttons button[aria-pressed="true"], .thunder-page .gcd-buttons button[aria-pressed="true"] { border-color: var(--purple); background: #302844; color: var(--text); }
+    #chapter-2 #long-buttons { top: 278px; }
+    #chapter-2 .route { position: absolute; top: 420px; left: 96px; right: 96px; }
+    #chapter-2 .route-hint { position: absolute; top: 626px; left: 96px; right: 96px; color: var(--muted); font-size: 30px; text-align: center; }
+    #chapter-2 .stats { position: absolute; top: 690px; left: 96px; right: 96px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+    #chapter-2 .stat { height: 164px; padding: 24px 30px; }
+    #chapter-2 .stat h2 { color: var(--muted); font-size: 27px; font-weight: 400; }
+    #chapter-2 .stat strong { display: block; margin-top: 16px; font-size: 62px; line-height: 1; }
+    #chapter-2 .route-note { position: absolute; top: 900px; left: 96px; right: 96px; color: var(--muted); font-size: 28px; line-height: 1.5; text-align: center; }
+    #chapter-2 .diagram-page .gcd-buttons { top: 272px; gap: 12px; }
+    #chapter-2 .diagram-page .gcd-buttons button { min-width: 82px; height: 56px; padding: 8px 16px; font-size: 28px; }
+    #chapter-2 .diagram { --columns: 7; --node-gap: 24px; --node-height: 230px; position: absolute; top: 366px; left: 96px; right: 96px; }
+    #chapter-2 .flow-row { display: grid; grid-template-columns: repeat(var(--columns), minmax(0, 1fr)); gap: var(--node-gap); }
+    #chapter-2 .flow-row + .flow-row { margin-top: var(--row-gap, 74px); }
+    #chapter-2 .flow-node { position: relative; height: var(--node-height); border: 2px solid #7e9eca; border-radius: 18px; background: #15263c; color: var(--text); text-align: center; }
+    #chapter-2 .flow-node:not(:last-child)::after { content: '→'; position: absolute; top: calc(50% - 23px); right: calc(-1 * var(--node-gap) - 2px); width: var(--node-gap); color: #8c9bb4; font-size: 34px; font-weight: 400; }
+    #chapter-2 .flow-node.ability { border-color: #778296; background: #1c2330; }
+    #chapter-2 .flow-node.variable { border-color: #d9ac68; background: #302719; }
+    #chapter-2 .flow-node.optional { border-style: dashed; }
+    #chapter-2 .flow-node.finish { border-color: var(--green); background: #17322e; }
+    #chapter-2 .flow-node.past { opacity: .6; }
+    #chapter-2 .flow-node.omitted { opacity: .3; }
+    #chapter-2 .flow-tag { position: absolute; top: 17px; left: 8px; right: 8px; color: #aec3df; font-size: 22px; }
+    #chapter-2 .variable .flow-tag { color: #e8bd7c; }
+    #chapter-2 .ability .flow-tag { color: var(--muted); }
+    #chapter-2 .flow-icons { position: absolute; top: 58px; left: 12px; right: 12px; height: 68px; display: flex; align-items: center; justify-content: center; gap: 12px; }
+    #chapter-2 .flow-icons img { width: 68px; height: 68px; border-radius: 7px; }
+    #chapter-2 .flow-icons.group img { width: 50px; height: 50px; }
+    #chapter-2 .flow-icons.group { gap: 7px; }
+    #chapter-2 .flow-icons span { color: var(--muted); font-size: 28px; }
+    #chapter-2 .flow-label { position: absolute; top: 140px; left: 8px; right: 8px; font-size: 30px; line-height: 38px; white-space: nowrap; }
+    #chapter-2 .flow-icons.group + .flow-label { font-size: 28px; }
+    #chapter-2 .flow-detail { position: absolute; bottom: 20px; left: 8px; right: 8px; color: var(--muted); font-size: 22px; line-height: 26px; white-space: nowrap; }
+    #chapter-2 .flow-turn { position: absolute; left: 0; width: 100%; height: var(--row-gap, 74px); overflow: visible; }
+    #chapter-2 .short-diagram .flow-node.omitted { opacity: .18; }
+    #chapter-2 .medium-diagram .diagram { top: 426px; --columns: 8; --node-height: 210px; --row-gap: 64px; }
+    #chapter-2 .medium-diagram .flow-tag { top: 14px; font-size: 21px; }
+    #chapter-2 .medium-diagram .flow-icons { top: 54px; height: 54px; }
+    #chapter-2 .medium-diagram .flow-icons img { width: 54px; height: 54px; }
+    #chapter-2 .medium-diagram .flow-icons.group { gap: 3px; }
+    #chapter-2 .medium-diagram .flow-icons.group img { width: 42px; height: 42px; }
+    #chapter-2 .medium-diagram .flow-icons.group span { font-size: 16px; }
+    #chapter-2 .medium-diagram .flow-label { top: 128px; font-size: 27px; line-height: 34px; }
+    #chapter-2 .medium-diagram .flow-detail { bottom: 18px; font-size: 19px; line-height: 24px; }
+    #chapter-2 .medium-diagram .flow-node:not(:last-child)::after { font-size: 28px; }
+    #chapter-2 .medium-diagram .branch-buttons { top: 344px; }
+    #chapter-2 .medium-diagram .branch-buttons button { height: 50px; font-size: 26px; }
+    #chapter-2 .medium-diagram .branch-buttons button[aria-pressed="true"] { border-color: var(--green); background: #17322e; }
+    #chapter-2 .diagram-page .stats { top: 950px; display: flex; justify-content: space-between; gap: 16px; }
+    #chapter-2 .diagram-page .stat { height: auto; padding: 0; display: flex; align-items: center; gap: 18px; border: 0; border-radius: 0; background: none; }
+    #chapter-2 .diagram-page .stat h2 { font-size: 24px; }
+    #chapter-2 .diagram-page .stat strong { margin: 0; font-size: 36px; white-space: nowrap; }
+    #chapter-2 .comparison .gcd-buttons { top: 278px; gap: 10px; }
+    #chapter-2 .comparison .gcd-buttons button { min-width: 72px; padding: 8px 14px; }
+    #chapter-2 .comparison .choice-label { margin-right: 8px; }
+    #chapter-2 .comparison-chart { position: absolute; top: 366px; left: 96px; width: 1110px; height: 378px; overflow: visible; }
+    #chapter-2 .comparison-chart text { font-family: inherit; }
+    #chapter-2 .comparison-result { position: absolute; top: 366px; right: 96px; width: 574px; height: 376px; padding: 22px; }
+    #chapter-2 .comparison-result h2 { font-size: 34px; }
+    #chapter-2 .comparison-result h2 span { float: right; padding-top: 8px; color: var(--muted); font-size: 24px; font-weight: 400; }
+    #chapter-2 .comparison-options { display: flex; gap: 8px; margin-top: 10px; }
+    #chapter-2 .comparison-options button { padding: 4px 8px; border: 1px solid #43516b; border-radius: 8px; background: #131d2c; color: var(--muted); font-size: 20px; white-space: nowrap; }
+    #chapter-2 .comparison-options button[aria-pressed="true"] { border-color: var(--green); background: #17322e; color: var(--text); }
+    #chapter-2 .comparison-row { margin-top: 12px; display: flex; align-items: baseline; justify-content: space-between; color: var(--muted); font-size: 26px; }
+    #chapter-2 .comparison-row b { color: var(--text); font-size: 34px; }
+    #chapter-2 .comparison-row small { font-size: 24px; }
+    #chapter-2 .comparison-gain { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); display: flex; align-items: baseline; justify-content: space-between; }
+    #chapter-2 .comparison-gain span { color: var(--muted); font-size: 26px; }
+    #chapter-2 .comparison-gain strong { color: var(--green); font-size: 54px; line-height: 1; }
+    #chapter-2 .comparison-result > p { margin-top: 10px; color: var(--muted); font-size: 21px; }
+    #chapter-2 .compare-strips { position: absolute; top: 784px; left: 96px; right: 96px; display: grid; gap: 14px; }
+    #chapter-2 .compare-strip { height: 92px; display: grid; grid-template-columns: 190px 1fr; align-items: center; }
+    #chapter-2 .compare-strip h3 { font-size: 26px; }
+    #chapter-2 .compare-strip .sequence { margin-left: 0; width: min(100%, calc(var(--slots) * 110px + (var(--slots) - 1) * 8px)); gap: 8px; }
+    #chapter-2 .compare-strip .skill-card { height: 92px; padding: 10px 4px; border-radius: 10px; }
+    #chapter-2 .compare-strip .skill-card img { width: 38px; height: 38px; }
+    #chapter-2 .compare-strip .skill-card strong { font-size: 21px; }
+    #chapter-2 .compare-strip .skill-index { display: none; }
     #chapter-3 .thunder-page .gcd-buttons { top: 278px; }
     #chapter-3 .thunder-page .gcd-buttons button { min-width: 116px; }
     #chapter-3 .thunder-row { position: absolute; left: 96px; right: 96px; }
@@ -262,21 +268,106 @@
     #chapter-3 .thunder-term strong { display: block; margin-top: 10px; font-size: 52px; }
     #chapter-3 .thunder-result .operator { text-align: center; font-size: 40px; }
     #chapter-3 .thunder-note { position: absolute; top: 956px; left: 96px; right: 96px; color: var(--muted); font-size: 25px; text-align: center; }
-    #chapter-2 .skill-card.fire-paradox { color: var(--purple); }
+    #chapter-1 .skill-card.fire-paradox { color: var(--purple); }
   </style>
 </head>
 <body>
   <nav class="chapter-nav" aria-label="章节导航">
-    <a href="#1-1"><span>第一节</span>雷的盈亏阈值</a>
-    <a href="#2-1"><span>第二节</span>基准循环截断</a>
-    <a href="#3-1"><span>第三节</span>斩杀特化</a>
+    <a href="#home">首页</a>
+    <a href="#1-1"><span>第一节</span>基准循环截断</a>
+    <a href="#2-1"><span>第二节</span>截断特化</a>
+    <a href="#3-1"><span>第三节</span>雷的盈亏阈值</a>
   </nav>
   <main class="viewport">
     <div class="canvas">
-      <section class="chapter" id="chapter-1" aria-label="第一节">
-      <header class="masthead"><span>第一节 ／ 雷的盈亏阈值</span></header>
+      <a class="home" id="home" href="#1-1" aria-label="开始阅读：不定GCD下的截断特化">
+        <img src="cover.png" width="1672" height="941" alt="不定GCD下的截断特化，黑魔法师补充。星夜下的黑魔法师眺望远方。">
+        <span class="home-start">开始阅读 <span aria-hidden="true">→</span></span>
+      </a>
+      <section class="chapter" id="chapter-1" aria-label="第一节" hidden>
+      <header class="masthead"><span>第一节 / 基准循环截断的亏损</span></header>
+      <div class="scenes">
+        <section class="scene" aria-label="01 截断线">
+          <h1 class="title">基准循环的截断</h1>
+          <p class="cycle-badge">完整一轮：13 GCD</p><p class="cycle-note">按完整GCD计时 ／ 计入技能均命中</p>
+          <div class="cutoff-row"><ol class="sequence" id="baseline-cutoff" aria-label="13格基准循环，前4格已命中"></ol><div class="cutoff-marker"><span>目标不可选中</span></div></div>
+          <div class="range-lines"><span class="done-range">已打出的4格</span><span class="remaining-range">后续技能来不及兑现</span></div>
+        </section>
 
-      <!-- 两页文案与排版；雷的数值、Q及折线由下方脚本计算。 -->
+        <section class="scene" aria-label="02 亏损曲线" hidden>
+          <h1 class="title">截断循环的亏损曲线</h1>
+          <div class="formula panel"><h2>Q = <span id="baseline-total"></span> ÷ 13 ≈ <span id="q-value"></span></h2><span class="formula-label">每格平均威力</span><p>累计盈亏 = 已打出的威力 − 已完成GCD数 × Q</p></div>
+          <svg class="curve" viewBox="0 0 1728 400" role="img" aria-labelledby="curve-title curve-description"><title id="curve-title">基准循环累计ΔP</title><desc id="curve-description">前12格均为负收益，第4格最低为负570.46，第12格为负103.38，第13格归零。</desc><g id="curve-drawing"></g></svg>
+        </section>
+
+        <section class="scene" aria-label="03 魔泉启动常规火段" hidden>
+          <h1 class="title">魔泉启动火段：9G累计<span class="mana-gain"></span></h1>
+          <div class="mana-intro panel">
+            <div class="mana-trigger"><img src="../../blm/nga-43757414/xivintheshell-icons/Skills/BLM/Manafont.png" alt="魔泉"><div><strong>魔泉</strong><span>0 GCD</span></div></div>
+            <div class="mana-sequence"><h2>火4×6 → 火悖论 → 耀星 → 绝望</h2><p><span id="mana-gcd"></span>G／<span id="mana-total"></span>威力 · ΔGCD = 9−13 = <span id="mana-dg"></span> · ΔP ≈ <span class="mana-gain"></span></p></div>
+          </div>
+          <svg class="curve" viewBox="0 0 1728 400" role="img" aria-labelledby="mana-curve-title mana-curve-description"><title id="mana-curve-title">魔泉常规火段累计ΔP</title><desc id="mana-curve-description">魔泉为0G起点；六发火4和火悖论后累计93.69，耀星后467.08，绝望后570.46。相对完整13G基准少4G。</desc><g id="mana-curve-drawing"></g></svg>
+          <p class="curve-caption">省去冰3 → 冰4 → 冰悖论 → AF1火3：−1536 + 4Q ≈ <span class="mana-gain"></span></p>
+        </section>
+      </div>
+      </section>
+      <section class="chapter" id="chapter-2" aria-label="第二节" hidden>
+      <header class="masthead">第二节 / 不定gcd下的截断特化</header>
+      <div class="scenes">
+        <section class="scene" aria-label="01 循环对比">
+          <h1 class="title">基准循环与截断特化</h1>
+          <div class="opening">
+            <div class="opening-block"><h2 class="row-heading">基准循环<span>按原顺序打到第8格</span></h2><div id="opening-baseline"></div></div>
+            <div class="opening-block"><h2 class="row-heading green">截断特化<span>B4 → U → 3 → 火4×3 → 核 → 耀</span></h2><div id="opening-execute"></div></div>
+            <div class="deadline"><span>截断线</span></div>
+          </div>
+        </section>
+
+        <section class="scene" aria-label="02 截断特化表" hidden>
+          <h1 class="title">截断特化</h1>
+          <div class="route-table-wrap panel">
+            <table class="route-table" aria-label="1至13核心G截断特化，按无B4、B4和B3加B4体系分组，6G三种方案、7G两种方案">
+              <colgroup><col style="width:9%"><col style="width:6%"><col style="width:10%"><col style="width:39%"><col style="width:18%"><col style="width:9%"><col style="width:9%"></colgroup>
+              <thead><tr><th scope="col">体系</th><th scope="col">核心G</th><th scope="col">本段总G</th><th scope="col">核心序列</th><th scope="col">进火MP要求</th><th scope="col">核心威力</th><th scope="col">ΔP</th></tr></thead>
+              <tbody id="route-table-body"></tbody>
+            </table>
+          </div>
+          <p class="route-table-key">U＝冰悖论 · 3＝AF1火苗火3 · D＝AF3绝望630 · 核＝核爆 · 耀＝耀星<br>无火苗3的双核：首核AF1、次核AF3。m＝异言次数，t＝雷次数（0或1）。</p>
+        </section>
+
+        <section class="scene diagram-page short-diagram" id="short-panel" aria-label="03 一至五G截断特化" hidden>
+          <h1 class="title">1—5G截断特化</h1>
+          <div class="gcd-buttons" id="short-buttons" aria-label="选择1至5核心GCD"></div>
+          <div class="diagram" id="short-flow" aria-label="1至5核心G截断流程，3G省略火4并使用绝望收尾"></div><div class="stats"></div>
+        </section>
+
+        <section class="scene diagram-page medium-diagram" id="medium-panel" aria-label="04 六至十一G截断特化" hidden>
+          <h1 class="title">6—11G截断特化</h1>
+          <div class="gcd-buttons" id="medium-buttons" aria-label="选择6至11核心GCD"></div>
+          <div class="gcd-buttons branch-buttons" id="medium-branches" aria-label="选择同核心G的B4方案"></div>
+          <div class="diagram" id="medium-flow" aria-label="B4体系循环图，按所选方案显示前U、火苗3、火4、收尾与末U"></div><div class="stats"></div>
+        </section>
+
+        <section class="scene" id="long-panel" aria-label="05 十二至十三G截断特化" hidden>
+          <h1 class="title">12—13G截断特化</h1>
+          <div class="gcd-buttons" id="long-buttons" aria-label="选择12或13核心GCD"></div>
+          <div class="route"></div><p class="route-hint"></p><div class="stats"></div>
+          <p class="route-note">UI3冰4回满蓝 · 13G以末尾冰悖论替代火悖论，同为540威力</p>
+        </section>
+
+        <section class="scene comparison" aria-label="06 截断特化的收益对比" hidden>
+          <h1 class="title">截断特化的收益对比</h1>
+          <div class="gcd-buttons" id="compare-buttons" aria-label="选择收益对照的核心GCD数"></div>
+          <svg class="comparison-chart" viewBox="0 0 1110 420" role="img" aria-labelledby="comparison-title comparison-description"><title id="comparison-title">1至13核心G的截断方案与基准截断收益对照</title><desc id="comparison-description">灰线为基准循环前N格的累计ΔP；彩色散点包含公式表中的全部方案，同G可切换收尾。</desc><g id="comparison-drawing"></g></svg>
+          <div class="comparison-result panel" id="comparison-result"></div>
+          <div class="compare-strips"><div class="compare-strip"><h3 class="muted">截断基准</h3><div id="compare-baseline"></div></div><div class="compare-strip"><h3 class="green">截断方案</h3><div id="compare-execute"></div></div></div>
+        </section>
+      </div>
+      </section>
+      <section class="chapter" id="chapter-3" aria-label="第三节" hidden>
+      <header class="masthead"><span>第三节 ／ 雷的盈亏阈值</span></header>
+
+      <!-- 雷的数值、Q及折线由下方脚本计算。 -->
       <div class="scenes">
         <section class="scene" aria-label="01 雷的逐G伤害期望">
           <h1 class="title">雷的逐G伤害期望</h1>
@@ -312,89 +403,7 @@
           <p class="counting-note">当前打雷这一格，已经计入总GCD数。</p>
         </section>
 
-      </div>
-
-      </section>
-      <section class="chapter" id="chapter-2" aria-label="第二节" hidden>
-      <header class="masthead"><span>第二节 / 基准循环截断的亏损</span></header>
-      <div class="scenes">
-        <section class="scene" aria-label="01 截断线">
-          <h1 class="title">基准循环的截断</h1>
-          <p class="cycle-badge">完整一轮：13 GCD</p><p class="cycle-note">按完整GCD计时 ／ 计入技能均命中</p>
-          <div class="cutoff-row"><ol class="sequence" id="baseline-cutoff" aria-label="13格基准循环，前4格已命中"></ol><div class="cutoff-marker"><span>目标不可选中</span></div></div>
-          <div class="range-lines"><span class="done-range">已打出的4格</span><span class="remaining-range">后续技能来不及兑现</span></div>
-        </section>
-
-        <section class="scene" aria-label="02 亏损曲线" hidden>
-          <h1 class="title">截断循环的亏损曲线</h1>
-          <div class="formula panel"><h2>Q = <span id="baseline-total"></span> ÷ 13 ≈ <span id="q-value"></span></h2><span class="formula-label">每格平均威力</span><p>累计盈亏 = 已打出的威力 − 已完成GCD数 × Q</p></div>
-          <svg class="curve" viewBox="0 0 1728 400" role="img" aria-labelledby="curve-title curve-description"><title id="curve-title">基准循环累计ΔP</title><desc id="curve-description">前12格均为负收益，第4格最低为负570.46，第12格为负103.38，第13格归零。</desc><g id="curve-drawing"></g></svg>
-        </section>
-
-        <section class="scene" aria-label="03 魔泉启动常规火段" hidden>
-          <h1 class="title">魔泉启动火段：9G累计<span class="mana-gain"></span></h1>
-          <div class="mana-intro panel">
-            <div class="mana-trigger"><img src="../../blm/nga-43757414/xivintheshell-icons/Skills/BLM/Manafont.png" alt="魔泉"><div><strong>魔泉</strong><span>0 GCD</span></div></div>
-            <div class="mana-sequence"><h2>火4×6 → 火悖论 → 耀星 → 绝望</h2><p><span id="mana-gcd"></span>G／<span id="mana-total"></span>威力 · ΔGCD = 9−13 = <span id="mana-dg"></span> · ΔP ≈ <span class="mana-gain"></span></p></div>
-          </div>
-          <svg class="curve" viewBox="0 0 1728 400" role="img" aria-labelledby="mana-curve-title mana-curve-description"><title id="mana-curve-title">魔泉常规火段累计ΔP</title><desc id="mana-curve-description">魔泉为0G起点；六发火4和火悖论后累计93.69，耀星后467.08，绝望后570.46。相对完整13G基准少4G。</desc><g id="mana-curve-drawing"></g></svg>
-          <p class="curve-caption">省去冰3 → 冰4 → 冰悖论 → AF1火3：−1536 + 4Q ≈ <span class="mana-gain"></span></p>
-        </section>
-      </div>
-      </section>
-      <section class="chapter" id="chapter-3" aria-label="第三节" hidden>
-      <header class="masthead">第三节 / 不定gcd下的斩杀特化</header>
-      <div class="scenes">
-        <section class="scene" aria-label="01 循环对比">
-          <h1 class="title">基准循环与斩杀特化</h1>
-          <div class="opening">
-            <div class="opening-block"><h2 class="row-heading">基准循环<span>按原顺序打到第8格</span></h2><div id="opening-baseline"></div></div>
-            <div class="opening-block"><h2 class="row-heading green">斩杀特化<span>B4 → U → 3 → 火4×3 → 核 → 耀</span></h2><div id="opening-execute"></div></div>
-            <div class="deadline"><span>截断线</span></div>
-          </div>
-        </section>
-
-        <section class="scene" aria-label="02 斩杀特化表" hidden>
-          <h1 class="title">斩杀特化</h1>
-          <div class="route-table-wrap panel">
-            <table class="route-table" aria-label="1至13核心G斩杀特化，按无B4、B4和B3加B4体系分组，6G三种方案、7G两种方案">
-              <colgroup><col style="width:9%"><col style="width:6%"><col style="width:10%"><col style="width:39%"><col style="width:18%"><col style="width:9%"><col style="width:9%"></colgroup>
-              <thead><tr><th scope="col">体系</th><th scope="col">核心G</th><th scope="col">本段总G</th><th scope="col">核心序列</th><th scope="col">进火MP要求</th><th scope="col">核心威力</th><th scope="col">ΔP</th></tr></thead>
-              <tbody id="route-table-body"></tbody>
-            </table>
-          </div>
-          <p class="route-table-key">U＝冰悖论 · 3＝AF1火苗火3 · D＝AF3绝望630 · 核＝核爆 · 耀＝耀星<br>无火苗3的双核：首核AF1、次核AF3。m＝异言次数，t＝雷次数（0或1）。</p>
-        </section>
-
-        <section class="scene diagram-page short-diagram" id="short-panel" aria-label="03 一至五G斩杀特化" hidden>
-          <h1 class="title">1—5G斩杀特化</h1>
-          <div class="gcd-buttons" id="short-buttons" aria-label="选择1至5核心GCD"></div>
-          <div class="diagram" id="short-flow" aria-label="1至5核心G斩杀流程，3G省略火4并使用绝望收尾"></div><div class="stats"></div>
-        </section>
-
-        <section class="scene diagram-page medium-diagram" id="medium-panel" aria-label="04 六至十一G斩杀特化" hidden>
-          <h1 class="title">6—11G斩杀特化</h1>
-          <div class="gcd-buttons" id="medium-buttons" aria-label="选择6至11核心GCD"></div>
-          <div class="gcd-buttons branch-buttons" id="medium-branches" aria-label="选择同核心G的B4方案"></div>
-          <div class="diagram" id="medium-flow" aria-label="B4体系循环图，按所选方案显示前U、火苗3、火4、收尾与末U"></div><div class="stats"></div>
-        </section>
-
-        <section class="scene" id="long-panel" aria-label="05 十二至十三G斩杀特化" hidden>
-          <h1 class="title">12—13G斩杀特化</h1>
-          <div class="gcd-buttons" id="long-buttons" aria-label="选择12或13核心GCD"></div>
-          <div class="route"></div><p class="route-hint"></p><div class="stats"></div>
-          <p class="route-note">UI3冰4回满蓝 · 13G以末尾冰悖论替代火悖论，同为540威力</p>
-        </section>
-
-        <section class="scene comparison" aria-label="06 斩杀特化的收益对比" hidden>
-          <h1 class="title">斩杀特化的收益对比</h1>
-          <div class="gcd-buttons" id="compare-buttons" aria-label="选择收益对照的核心GCD数"></div>
-          <svg class="comparison-chart" viewBox="0 0 1110 420" role="img" aria-labelledby="comparison-title comparison-description"><title id="comparison-title">1至13核心G的斩杀方案与基准截断收益对照</title><desc id="comparison-description">灰线为基准循环前N格的累计ΔP；彩色散点包含公式表中的全部方案，同G可切换收尾。</desc><g id="comparison-drawing"></g></svg>
-          <div class="comparison-result panel" id="comparison-result"></div>
-          <div class="compare-strips"><div class="compare-strip"><h3 class="muted">截断基准</h3><div id="compare-baseline"></div></div><div class="compare-strip"><h3 class="green">斩杀方案</h3><div id="compare-execute"></div></div></div>
-        </section>
-
-        <section class="scene thunder-page" aria-label="07 截断雷" hidden>
+        <section class="scene thunder-page" aria-label="03 截断雷" hidden>
           <h1 class="title">截断雷的盈亏</h1>
           <div class="gcd-buttons" id="thunder-buttons" aria-label="选择被新雷覆盖的旧雷跳数"></div>
           <div class="thunder-row first"><h2>补雷：1雷 + 3异言 + <span class="purple">8G B4特化</span> = 12G</h2><div id="thunder-with"></div></div>
@@ -406,9 +415,9 @@
       </section>
     </div>
   </main>
-  <nav class="controls" aria-label="第一节画面切换" data-chapter="1"><a href="#1-1">01 雷的逐G伤害期望</a><a href="#1-2">02 雷对比基线的盈亏GCD阈值</a></nav>
-  <nav class="controls" aria-label="第二节画面切换" data-chapter="2" hidden><a href="#2-1">01 截断线</a><a href="#2-2">02 亏损曲线</a><a href="#2-3">03 魔泉火段</a></nav>
-  <nav class="controls" aria-label="第三节画面切换" data-chapter="3" hidden><a href="#3-1">01 循环对比</a><a href="#3-2">02 斩杀特化表</a><a href="#3-3">03 1—5G</a><a href="#3-4">04 6—11G B4体系</a><a href="#3-5">05 12—13G</a><a href="#3-6">06 收益对照</a><a href="#3-7">07 截断雷</a></nav>
+  <nav class="controls" aria-label="第一节画面切换" data-chapter="1" hidden><a href="#1-1">01 截断线</a><a href="#1-2">02 亏损曲线</a><a href="#1-3">03 魔泉火段</a></nav>
+  <nav class="controls" aria-label="第二节画面切换" data-chapter="2" hidden><a href="#2-1">01 循环对比</a><a href="#2-2">02 截断特化表</a><a href="#2-3">03 1—5G</a><a href="#2-4">04 6—11G B4体系</a><a href="#2-5">05 12—13G</a><a href="#2-6">06 收益对照</a></nav>
+  <nav class="controls" aria-label="第三节画面切换" data-chapter="3" hidden><a href="#3-1">01 雷的逐G伤害期望</a><a href="#3-2">02 雷对比基线的盈亏GCD阈值</a><a href="#3-3">03 截断雷</a></nav>
   <script>
     // 三节共用技能威力、基准循环和雷的期望公式。
     const skills = {
@@ -438,7 +447,7 @@
     const gcdSeconds = 2.45;
     const expectedThunder = seconds => 150 + 61.02 * Math.min(30, seconds - .757) / 3;
 
-    // 第1节：雷的盈亏阈值。
+    // 第3节：雷的盈亏阈值。
     (() => {
       const thunderPotency = Array.from({ length: 13 }, (_, i) => expectedThunder((i + 1) * gcdSeconds));
       const seven = thunderPotency[6];
@@ -473,7 +482,7 @@
         <text x="1644" y="34" text-anchor="end" fill="var(--purple)" font-size="30" font-weight="700">跳满 ${thunderPotency[12].toFixed(2)}</text>`;
     })();
 
-    // 第2节：基准循环截断。
+    // 第1节：基准循环截断。
     (() => {
       // 魔泉火段省去基准前4G；魔泉本身只作为0G起点，不占后续9个GCD。
       const manafont = baseline.slice(4);
@@ -527,7 +536,7 @@
         <text x="1644" y="30" text-anchor="end" fill="var(--green)" font-size="32" font-weight="700">9G +${manaGain.toFixed(2)}</text>`;
     })();
 
-    // 第3节：斩杀特化。
+    // 截断特化与截断雷。
     (() => {
       const routes = {
         1: { keys: ['u'], mp: null },
@@ -713,7 +722,7 @@
         document.getElementById('comparison-drawing').innerHTML = `
           <text x="4" y="12" fill="var(--muted)" font-size="25">ΔP = 核心威力 − N×Q</text>
           <line x1="676" y1="5" x2="720" y2="5" stroke="#7d8ca5" stroke-width="4"/><text x="731" y="13" fill="var(--muted)" font-size="25">截断基准</text>
-          <circle cx="915" cy="5" r="7" fill="var(--green)"/><text x="935" y="13" fill="var(--muted)" font-size="25">斩杀方案</text>
+          <circle cx="915" cy="5" r="7" fill="var(--green)"/><text x="935" y="13" fill="var(--muted)" font-size="25">截断方案</text>
           ${[0, -200, -400, -600].map(p => `<line x1="92" y1="${by(p)}" x2="1042" y2="${by(p)}" stroke="${p === 0 ? '#63dfbb88' : 'var(--line)'}" ${p === 0 ? 'stroke-dasharray="10 7"' : ''}/><text x="70" y="${by(p) + 9}" text-anchor="end" fill="var(--muted)" font-size="25">${p}</text>`).join('')}
           <line x1="${bx(n - 1)}" y1="30" x2="${bx(n - 1)}" y2="363" stroke="#b7a0ff55" stroke-width="2" stroke-dasharray="6 7"/>
           <polyline points="${baselineDelta.map((p, i) => `${bx(i)},${by(p)}`).join(' ')}" fill="none" stroke="#7d8ca5" stroke-width="3"/>
@@ -729,7 +738,7 @@
         const sRoute = potency(route.keys);
         const optionButtons = options.length > 1 ? `<div class="comparison-options" aria-label="选择同核心G的对照方案">${options.map((option, i) => `<button type="button" data-variant="${i}" aria-pressed="${i === index}">${n >= 6 ? b4BranchName(option) : coreExpression(option.keys)}</button>`).join('')}</div>` : '';
         const result = document.getElementById('comparison-result');
-        result.innerHTML = `<h2>${n} 核心G<span>威力 ／ ΔP</span></h2>${optionButtons}<div class="comparison-row"><span>截断基准</span><b>${sBase} <small class="muted">／${signed(baselineDelta[n - 1])}</small></b></div><div class="comparison-row"><span>斩杀方案</span><b>${sRoute} <small class="${tone(delta)}">／${signed(delta)}</small></b></div><div class="comparison-gain"><span>核心威力差</span><strong>${sRoute === sBase ? '0' : '+' + (sRoute - sBase)}</strong></div><p>核心口径 · 双方相同的雷、异言已抵消</p>`;
+        result.innerHTML = `<h2>${n} 核心G<span>威力 ／ ΔP</span></h2>${optionButtons}<div class="comparison-row"><span>截断基准</span><b>${sBase} <small class="muted">／${signed(baselineDelta[n - 1])}</small></b></div><div class="comparison-row"><span>截断方案</span><b>${sRoute} <small class="${tone(delta)}">／${signed(delta)}</small></b></div><div class="comparison-gain"><span>核心威力差</span><strong>${sRoute === sBase ? '0' : '+' + (sRoute - sBase)}</strong></div><p>核心口径 · 双方相同的雷、异言已抵消</p>`;
         result.querySelectorAll('button').forEach(button => button.addEventListener('click', () => renderComparison(n, Number(button.dataset.variant))));
         document.getElementById('compare-baseline').innerHTML = skillCards(baseline.slice(0, n));
         document.getElementById('compare-execute').innerHTML = skillCards(route.keys);
@@ -761,24 +770,29 @@
       renderThunder(0);
     })();
 
-    // 地址格式：#章节-画面；上下两级导航共用同一个切换入口。
+    // 地址格式：#home 或 #章节-画面；首页与章节共用同一个切换入口。
+    const home = document.getElementById('home');
     const chapters = [...document.querySelectorAll('.chapter')];
     const scenes = chapters.map(chapter => [...chapter.querySelectorAll('.scene')]);
-    const chapterLinks = [...document.querySelectorAll('.chapter-nav a')];
+    const [homeLink, ...chapterLinks] = document.querySelectorAll('.chapter-nav a');
     const menus = [...document.querySelectorAll('.controls')];
     const pageLinks = [...document.querySelectorAll('.controls a')];
+    const pageHashes = [homeLink.hash, ...pageLinks.map(link => link.hash)];
     let currentChapter = 0;
     let currentPage = 0;
     function fitCanvas() {
-      const navigationHeight = document.querySelector('.chapter-nav').offsetHeight + menus[currentChapter].offsetHeight;
+      const navigationHeight = document.querySelector('.chapter-nav').offsetHeight + menus.reduce((height, menu) => height + menu.offsetHeight, 0);
       const scale = Math.min((innerWidth - 24) / 1920, (innerHeight - navigationHeight - 48) / 1080);
       document.documentElement.style.setProperty('--scale', scale);
     }
     function showPage() {
       const [chapter, page] = location.hash.slice(1).split('-').map(value => Number(value) - 1);
       const target = scenes[chapter]?.[page];
-      currentChapter = target ? chapter : 0;
+      currentChapter = target ? chapter : -1;
       currentPage = target ? page : 0;
+      home.hidden = Boolean(target);
+      if (home.hidden) homeLink.removeAttribute('aria-current');
+      else homeLink.setAttribute('aria-current', 'true');
       chapters.forEach((chapter, i) => {
         chapter.hidden = i !== currentChapter;
         menus[i].hidden = i !== currentChapter;
@@ -791,7 +805,9 @@
         if (link.hash === hash) link.setAttribute('aria-current', 'page');
         else link.removeAttribute('aria-current');
       });
-      document.title = `${scenes[currentChapter][currentPage].querySelector('h1').textContent} · 不定GCD下的斩杀特化`;
+      document.title = home.hidden
+        ? `${scenes[currentChapter][currentPage].querySelector('h1').textContent} · 不定GCD下的截断特化`
+        : '不定GCD下的截断特化 · 黑魔法师补充';
       fitCanvas();
     }
     addEventListener('hashchange', showPage);
@@ -800,9 +816,9 @@
       if (event.key === ' ' && event.target.closest('button, a')) return;
       if (['ArrowRight', 'ArrowLeft', ' '].includes(event.key)) {
         event.preventDefault();
-        const index = pageLinks.findIndex(link => link.getAttribute('aria-current') === 'page');
+        const index = home.hidden ? pageLinks.findIndex(link => link.getAttribute('aria-current') === 'page') + 1 : 0;
         const next = index + (event.key === 'ArrowLeft' ? -1 : 1);
-        location.hash = pageLinks[Math.max(0, Math.min(pageLinks.length - 1, next))].hash;
+        location.hash = pageHashes[Math.max(0, Math.min(pageHashes.length - 1, next))];
       }
     });
     showPage();
