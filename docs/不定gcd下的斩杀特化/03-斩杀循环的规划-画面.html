@@ -203,7 +203,7 @@
         <section class="scene diagram-page short-diagram" id="short-panel" aria-label="03 一至五G斩杀特化" hidden>
           <h1 class="title">1—5G斩杀特化</h1>
           <div class="gcd-buttons" id="short-buttons" aria-label="选择1至5核心GCD"></div>
-          <div class="diagram" id="short-flow" aria-label="核心U、火苗火3、火4、AF3绝望、U的前缀截断流程"></div><div class="stats"></div>
+          <div class="diagram" id="short-flow" aria-label="1至5核心G斩杀流程，3G省略火4并使用绝望收尾"></div><div class="stats"></div>
         </section>
 
         <section class="scene diagram-page medium-diagram" id="medium-panel" aria-label="04 六至十一G斩杀特化" hidden>
@@ -241,7 +241,7 @@
   </div>
   <nav class="controls" aria-label="画面切换"><a href="#1">01 循环对比</a><a href="#2">02 斩杀特化表</a><a href="#3">03 1—5G</a><a href="#4">04 6—11G B4体系</a><a href="#5">05 12—13G</a><a href="#6">06 收益对照</a><a href="#7">07 截断雷</a></nav>
   <script>
-    // 1—5G模型采用短绝望前缀；B4模型与公式表共用tableGroups的方案数据。
+    // 1—5G与B4模型均与公式表共用方案数据。
     // Q沿用standard-cycle-cutoff.md。
     // 雷的期望伤害沿用high-thunder.md。所有收益由未舍入的威力与Q计算。
     const skills = {
@@ -265,11 +265,12 @@
     const baseline = ['b3', 'b4', 'u', 'f3', ...Array(6).fill('f4'), 'a', 'star', 'd'];
     const potency = keys => keys.reduce((sum, key) => sum + skills[key].potency, 0);
     const q = potency(baseline) / baseline.length;
-    const shortCore = ['u', 'f3', 'f4', 'd', 'u'];
     const routes = {
-      ...Object.fromEntries(shortCore.map((_, i) => [i + 1, {
-        keys: shortCore.slice(0, i + 1), mp: i < 2 ? null : i === 2 ? 1600 : 2400
-      }])),
+      1: { keys: ['u'], mp: null },
+      2: { keys: ['u', 'f3'], mp: null },
+      3: { keys: ['u', 'f3', 'd'], mp: 800 },
+      4: { keys: ['u', 'f3', 'f4', 'd'], mp: 2400 },
+      5: { keys: ['u', 'f3', 'f4', 'd', 'u'], mp: 2400 },
       8: { keys: ['b4', 'u', 'f3', 'f4', 'f4', 'f4', 'flare', 'star'], mp: 3200 },
       9: { keys: ['b4', 'u', 'f3', 'f4', 'f4', 'f4', 'flare', 'star', 'u'], mp: 3200 },
       10: { keys: ['b4', 'u', 'f3', 'f4', 'f4', 'f4', 'f4', 'flare', 'star', 'u'], mp: 4800 },
@@ -278,8 +279,7 @@
       13: { keys: ['b3', 'b4', 'u', 'f3', ...Array(6).fill('f4'), 'star', 'd', 'u'], mp: 8000 }
     };
     const shortAlternatives = {
-      2: { keys: ['f3', 'd'], mp: 800 },
-      3: { keys: ['u', 'f3', 'd'], mp: 800 }
+      2: { keys: ['f3', 'd'], mp: 800 }
     };
     const baselineDelta = baseline.map((_, i) => potency(baseline.slice(0, i + 1)) - (i + 1) * q);
     const signed = value => Math.abs(value) < 1e-8 ? '0.00' : (value > 0 ? '+' : '−') + Math.abs(value).toFixed(2);
@@ -303,7 +303,7 @@
       return '≥' + route.mp;
     }
     const tableGroups = [
-      { label: '无B4', range: '1—5G', type: 'short', options: [routes[1], routes[2], shortAlternatives[2], shortAlternatives[3], routes[4], routes[5]] },
+      { label: '无B4', range: '1—5G', type: 'short', options: [routes[1], routes[2], shortAlternatives[2], routes[3], routes[4], routes[5]] },
       { label: 'B4体系', range: '6—11G', type: 'b4', options: [
         { keys: ['b4', 'u', 'f3', 'f4', 'f4', 'd'], mp: 2400 },
         { keys: ['b4', 'u', 'f3', 'flare', 'flare', 'star'], mp: 2400 },
@@ -338,7 +338,7 @@
     document.getElementById('opening-baseline').innerHTML = skillCards(baseline, { fadeAfter: 8 });
     document.getElementById('opening-execute').innerHTML = skillCards(routes[8].keys, { slots: 13 });
 
-    // 每个技能节点为可编辑HTML；step表示保留该节点所需的核心G数。
+    // 每个技能节点为可编辑HTML；step表示5G完整模型中的核心位。
     function flowNode({ keys, label, tag, note, type, step = 0 }) {
       return `<div class="flow-node ${type}" data-step="${step}"><span class="flow-tag">${tag}</span><div class="flow-icons${keys.length > 1 ? ' group' : ''}">${keys.map(key => `<img src="${iconURL(key)}" alt="${skills[key].label}">`).join('<span>→</span>')}</div><strong class="flow-label">${label}</strong><p class="flow-detail">${note}</p></div>`;
     }
@@ -429,7 +429,12 @@
         root.querySelector('.route').innerHTML = skillCards(route.keys, { shifts: true });
         root.querySelector('.route-hint').textContent = n === 12 ? '12G：省去火悖论，保留耀星与绝望' : '13G：最后再补冰悖论，总威力回到6846';
       } else if (family === 'short') {
-        root.querySelectorAll('[data-step]').forEach(node => node.classList.toggle('omitted', Number(node.dataset.step) > n));
+        root.querySelectorAll('[data-step]').forEach(node => {
+          const step = Number(node.dataset.step);
+          node.classList.toggle('omitted', n === 3 ? step === 3 || step > 4 : step > n);
+        });
+        root.querySelector('[data-step="3"] .flow-tag').textContent = n === 3 ? '省略' : '核心 3';
+        root.querySelector('[data-step="4"] .flow-tag').textContent = n === 3 ? '核心 3' : '核心 4';
       }
     }
 
