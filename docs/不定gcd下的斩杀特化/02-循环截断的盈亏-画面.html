@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>第二节：基准循环截断的亏损 · 视频画面</title>
+  <style>
+    /* 四页共用样式；画布为1920 × 1080，文案在下方各页中修改。 */
+    :root {
+      --text: #f0f3fc;
+      --muted: #aab8cc;
+      --purple: #b7a0ff;
+      --orange: #ffb67d;
+      --pink: #ff8ca7;
+      --green: #63dfbb;
+      --line: #2c3b50;
+      --panel: #162131;
+      --scale: 1;
+      color-scheme: dark;
+      font-family: "Arial", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-content: center; gap: 18px; overflow: hidden; background: #060a12; color: var(--text); }
+    .viewport { width: calc(1920px * var(--scale)); height: calc(1080px * var(--scale)); }
+    .canvas { position: relative; width: 1920px; height: 1080px; transform: scale(var(--scale)); transform-origin: top left; overflow: hidden; background: linear-gradient(112deg, #0a101a, #12152d); }
+    .masthead { position: absolute; left: 96px; right: 96px; display: flex; color: var(--muted); }
+    .masthead { top: 56px; height: 63px; justify-content: flex-end; border-bottom: 1px solid var(--line); font-size: 28px; }
+    .scene { position: absolute; inset: 0; }
+    .scene[hidden] { display: none; }
+    h1, h2, p { margin: 0; }
+    .title { position: absolute; top: 146px; left: 96px; right: 96px; font-size: 72px; line-height: 1.25; font-weight: 700; }
+    .subtitle { position: absolute; top: 247px; left: 96px; right: 96px; color: var(--muted); font-size: 32px; }
+    .panel { border: 1px solid var(--line); border-radius: 26px; background: var(--panel); }
+    .purple { color: var(--purple); }
+    .muted { color: var(--muted); }
+    .sequence { margin: 0; padding: 0; display: grid; grid-template-columns: repeat(13, 1fr); gap: 12px; list-style: none; }
+    .skill-card { height: 200px; padding: 10px 6px 16px; display: flex; flex-direction: column; justify-content: space-between; align-items: center; border: 1px solid currentColor; border-radius: 18px; background: #192438; color: var(--purple); }
+    .skill-card.fire { color: var(--orange); }
+    .skill-card.finish { color: var(--green); }
+    .skill-index { font-size: 28px; color: var(--muted); }
+    .skill-card img { width: 58px; height: 58px; border: 1px solid var(--line); border-radius: 8px; }
+    .skill-card strong { font-size: 28px; white-space: nowrap; }
+    .cycle-badge { position: absolute; top: 332px; left: 96px; padding: 10px 36px; border-radius: 40px; background: #202a3d; color: var(--purple); font-size: 36px; font-weight: 700; }
+    .cycle-note { position: absolute; top: 348px; right: 96px; color: var(--muted); font-size: 28px; }
+    .cutoff-row { position: absolute; top: 510px; left: 116px; right: 152px; }
+    .cutoff-row .skill-card:nth-child(n+5) { opacity: .28; }
+    .cutoff-marker { position: absolute; left: 506px; top: -28px; height: 296px; border-left: 3px dashed var(--pink); }
+    .cutoff-marker span { position: absolute; top: -65px; left: -116px; width: 230px; padding: 10px 0; text-align: center; border-radius: 40px; background: #392336; color: var(--pink); font-size: 32px; font-weight: 700; }
+    .range-lines { position: absolute; top: 744px; left: 116px; right: 152px; display: flex; gap: 28px; text-align: center; font-size: 32px; }
+    .range-lines span { padding-top: 12px; border-top: 3px solid currentColor; }
+    .done-range { width: 494px; color: var(--purple); font-weight: 700; }
+    .remaining-range { flex: 1; color: #788aa7; }
+    .formula { position: absolute; top: 327px; left: 96px; right: 96px; height: 154px; padding: 16px 36px; }
+    .formula h2 { color: var(--purple); font-size: 52px; }
+    .formula p { margin-top: 15px; font-size: 38px; }
+    .formula-label { position: absolute; top: 34px; right: 36px; color: var(--muted); font-size: 32px; }
+    .curve { position: absolute; top: 518px; left: 96px; width: 1728px; height: 400px; overflow: visible; }
+    .curve text { font-family: inherit; }
+    .curve-caption { position: absolute; top: 934px; left: 96px; right: 96px; text-align: center; color: var(--muted); font-size: 30px; }
+    .milestones { position: absolute; top: 344px; left: 96px; right: 96px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; }
+    .milestone { position: relative; height: 550px; padding: 30px 34px; border: 2px solid var(--accent); }
+    .milestone h2 { color: var(--accent); font-size: 44px; }
+    .milestone img { position: absolute; top: 32px; right: 40px; width: 76px; height: 76px; border-radius: 8px; }
+    .metric-label { margin-top: 42px; color: var(--muted); font-size: 28px; }
+    .metric-value { display: block; margin-top: 12px; color: var(--accent); font-size: 100px; line-height: 1.1; }
+    .metric-description { margin-top: 36px; font-size: 32px; }
+    .metric-track { margin: 42px 0 0; padding: 0; display: grid; grid-template-columns: repeat(13, 1fr); gap: 5px; list-style: none; }
+    .metric-track li { height: 42px; display: grid; place-content: center; border-radius: 7px; background: #0c1524; color: var(--muted); font-size: 22px; }
+    .metric-track .past { background: #2b344b; }
+    .metric-track .current { background: var(--accent); color: #0a101a; }
+    .metric-note { position: absolute; bottom: 38px; left: 34px; right: 24px; color: var(--accent); font-size: 28px; font-weight: 700; }
+    .milestone-caption { position: absolute; bottom: 126px; left: 96px; right: 96px; text-align: center; font-size: 38px; font-weight: 700; }
+    .mana-intro { position: absolute; top: 327px; left: 96px; right: 96px; height: 154px; padding: 24px 36px; display: flex; align-items: center; gap: 40px; }
+    .mana-trigger { flex: none; display: flex; align-items: center; gap: 20px; }
+    .mana-trigger img { width: 72px; height: 72px; border-radius: 9px; }
+    .mana-trigger strong { display: block; color: var(--purple); font-size: 38px; }
+    .mana-trigger span { display: block; margin-top: 8px; color: var(--muted); font-size: 26px; }
+    .mana-sequence h2 { font-size: 38px; }
+    .mana-sequence p { margin-top: 14px; color: var(--muted); font-size: 32px; }
+    .mana-gain { color: var(--green); }
+    .controls { display: flex; justify-content: center; gap: 8px; }
+    .controls a { padding: 9px 14px; color: #aab8cc; border: 1px solid #29374a; border-radius: 8px; background: #121b29; font-size: 14px; text-decoration: none; }
+    .controls a[aria-current="page"] { color: #f0f3fc; border-color: #b7a0ff; background: #2b2540; }
+  </style>
+</head>
+<body>
+  <div class="viewport">
+    <div class="canvas">
+      <header class="masthead"><span>第二节 / 基准循环截断的亏损</span></header>
+      <main>
+        <section class="scene" aria-label="01 截断线">
+          <h1 class="title">基准循环的截断</h1>
+          <p class="subtitle">13格基准循环 · 截断线停在第4格末尾</p>
+          <p class="cycle-badge">完整一轮：13 GCD</p><p class="cycle-note">按完整GCD计时 ／ 计入技能均命中</p>
+          <div class="cutoff-row"><ol class="sequence" id="baseline-cutoff" aria-label="13格基准循环，前4格已命中"></ol><div class="cutoff-marker"><span>目标不可选中</span></div></div>
+          <div class="range-lines"><span class="done-range">已打出的4格</span><span class="remaining-range">后续技能来不及兑现</span></div>
+        </section>
+
+        <section class="scene" aria-label="02 亏损曲线" hidden>
+          <h1 class="title">截断循环的亏损曲线</h1>
+          <p class="subtitle">Q取完整13G基准的平均威力，计算后再舍入</p>
+          <div class="formula panel"><h2>Q = <span id="baseline-total"></span> ÷ 13 ≈ <span id="q-value"></span></h2><span class="formula-label">每格平均威力</span><p>累计盈亏 = 已打出的威力 − 已完成GCD数 × Q</p></div>
+          <svg class="curve" viewBox="0 0 1728 400" role="img" aria-labelledby="curve-title curve-description"><title id="curve-title">基准循环累计ΔP</title><desc id="curve-description">前12格均为负收益，第4格最低为负570.46，第12格为负103.38，第13格归零。</desc><g id="curve-drawing"></g></svg>
+          <p class="curve-caption">已完成的GCD数 · 低于零线，代表低于基准平均水平</p>
+        </section>
+
+        <section class="scene" aria-label="03 第4格第12格第13格" hidden>
+          <h1 class="title">收益，要靠后面的技能补回来</h1>
+          <p class="subtitle">第1至12格均低于平均线，最后一发绝望使整轮归零</p>
+          <div class="milestones">
+            <div class="milestone panel" style="--accent: var(--pink)"><h2>第4格</h2><img src="../../blm/nga-43757414/xivintheshell-icons/Skills/BLM/Fire%203.png" alt="AF1火3"><p class="metric-label">累计盈亏</p><strong class="metric-value" id="delta-four"></strong><p class="metric-description">AF1火3之后</p><ol class="metric-track" data-count="4" aria-label="完成前4格"></ol><p class="metric-note">累计亏损最深</p></div>
+            <div class="milestone panel" style="--accent: var(--purple)"><h2>第12格</h2><img src="../../blm/nga-43757414/xivintheshell-icons/Skills/BLM/Flare%20Star.png" alt="耀星"><p class="metric-label">累计盈亏</p><strong class="metric-value" id="delta-twelve"></strong><p class="metric-description">耀星之后</p><ol class="metric-track" data-count="12" aria-label="完成前12格"></ol><p class="metric-note">打完耀星，仍差约103</p></div>
+            <div class="milestone panel" style="--accent: var(--green)"><h2>第13格</h2><img src="../../blm/nga-43757414/xivintheshell-icons/Skills/BLM/Despair.png" alt="绝望"><p class="metric-label">累计盈亏</p><strong class="metric-value" id="delta-thirteen"></strong><p class="metric-description">绝望之后</p><ol class="metric-track" data-count="13" aria-label="完成全部13格"></ol><p class="metric-note">绝望命中，完整一轮归零</p></div>
+          </div>
+          <p class="milestone-caption">耀星 + 绝望，让后段收益赶上前段成本。</p>
+        </section>
+
+        <section class="scene" aria-label="04 魔泉启动常规火段" hidden>
+          <h1 class="title">魔泉启动火段：9G累计<span class="mana-gain"></span></h1>
+          <p class="subtitle">火状态下魔泉可用：回满蓝，补齐AF3、3根冰针和悖论</p>
+          <div class="mana-intro panel">
+            <div class="mana-trigger"><img src="../../blm/nga-43757414/xivintheshell-icons/Skills/BLM/Manafont.png" alt="魔泉"><div><strong>魔泉</strong><span>0 GCD</span></div></div>
+            <div class="mana-sequence"><h2>火4×6 → 火悖论 → 耀星 → 绝望</h2><p><span id="mana-gcd"></span>G／<span id="mana-total"></span>威力 · ΔGCD = 9−13 = <span id="mana-dg"></span> · ΔP ≈ <span class="mana-gain"></span></p></div>
+          </div>
+          <svg class="curve" viewBox="0 0 1728 400" role="img" aria-labelledby="mana-curve-title mana-curve-description"><title id="mana-curve-title">魔泉常规火段累计ΔP</title><desc id="mana-curve-description">魔泉为0G起点；六发火4和火悖论后累计93.69，耀星后467.08，绝望后570.46。相对完整13G基准少4G。</desc><g id="mana-curve-drawing"></g></svg>
+          <p class="curve-caption">省去冰3 → 冰4 → 冰悖论 → AF1火3：−1536 + 4Q ≈ <span class="mana-gain"></span></p>
+        </section>
+      </main>
+    </div>
+  </div>
+  <nav class="controls" aria-label="画面切换"><a href="#1">01 截断线</a><a href="#2">02 亏损曲线</a><a href="#3">03 收益补回</a><a href="#4">04 魔泉火段</a></nav>
+  <script>
+    // 技能威力与序列沿用 standard-cycle-cutoff.md；汇总和图表由同一组数据计算。
+    const skills = {
+      b3: { label: '冰3', icon: 'Blizzard 3', potency: 290, group: 'ice' },
+      b4: { label: '冰4', icon: 'Blizzard 4', potency: 300, group: 'ice' },
+      u: { label: '冰悖论', icon: 'Paradox', potency: 540, group: 'ice' },
+      f3: { label: 'AF1火3', icon: 'Fire 3', potency: 406, group: 'fire' },
+      f4: { label: '火4', icon: 'Fire 4', potency: 540, group: 'fire' },
+      a: { label: '火悖论', icon: 'Paradox', potency: 540, group: 'ice' },
+      star: { label: '耀星', icon: 'Flare Star', potency: 900, group: 'finish' },
+      d: { label: '绝望', icon: 'Despair', potency: 630, group: 'finish' },
+      manafont: { label: '魔泉（0GCD）', icon: 'Manafont', potency: 0, group: 'fire' }
+    };
+    const baseline = ['b3', 'b4', 'u', 'f3', ...Array(6).fill('f4'), 'a', 'star', 'd'];
+    const totalPotency = keys => keys.reduce((total, key) => total + skills[key].potency, 0);
+    const baselineTotal = totalPotency(baseline);
+    const q = baselineTotal / baseline.length;
+    const cumulative = baseline.map((_, i) => totalPotency(baseline.slice(0, i + 1)));
+    const delta = cumulative.map((s, i) => s - (i + 1) * q);
+    // 魔泉火段省去基准前4G；魔泉本身只作为0G起点，不占后续9个GCD。
+    const manafont = baseline.slice(4);
+    const manaNodes = ['manafont', ...manafont];
+    const manaTotal = totalPotency(manafont);
+    const manaCumulative = [0, ...manafont.map((_, i) => totalPotency(manafont.slice(0, i + 1)))];
+    const manaDelta = manaCumulative.map((s, i) => s - i * q);
+    const manaGain = manaTotal - manafont.length * q;
+    const iconRoot = '../../blm/nga-43757414/xivintheshell-icons/Skills/BLM/';
+    function skillCards(keys) {
+      return keys.map((key, i) => {
+        const skill = skills[key];
+        return `<li class="skill-card ${skill.group}"><span class="skill-index">${i + 1}</span><img src="${iconRoot}${encodeURIComponent(skill.icon)}.png" alt=""><strong>${skill.label}</strong></li>`;
+      }).join('');
+    }
+    function nodeIcon(key, cx, cy, color) {
+      const skill = skills[key];
+      return `<g class="curve-node"><title>${skill.label}</title><rect x="${cx - 27}" y="${cy - 27}" width="54" height="54" rx="8" fill="#121b29" stroke="${color}" stroke-width="2"/><image href="${iconRoot}${encodeURIComponent(skill.icon)}.png" x="${cx - 24}" y="${cy - 24}" width="48" height="48"/></g>`;
+    }
+    document.getElementById('baseline-cutoff').innerHTML = skillCards(baseline);
+    document.getElementById('baseline-total').textContent = baselineTotal;
+    document.getElementById('q-value').textContent = q.toFixed(2);
+    document.getElementById('delta-four').textContent = '−' + Math.abs(delta[3]).toFixed(2);
+    document.getElementById('delta-twelve').textContent = '−' + Math.abs(delta[11]).toFixed(2);
+    document.getElementById('delta-thirteen').textContent = delta[12].toFixed(0);
+    document.getElementById('mana-gcd').textContent = manafont.length;
+    document.getElementById('mana-total').textContent = manaTotal;
+    document.getElementById('mana-dg').textContent = '−' + (baseline.length - manafont.length);
+    document.querySelectorAll('.mana-gain').forEach(el => { el.textContent = '+' + manaGain.toFixed(2); });
+    document.querySelectorAll('.metric-track').forEach(track => {
+      const count = Number(track.dataset.count);
+      track.innerHTML = baseline.map((_, i) => `<li class="${i + 1 === count ? 'current' : i + 1 < count ? 'past' : ''}">${i + 1}</li>`).join('');
+    });
+
+    const x = i => 148 + i * 1496 / 12;
+    const y = p => 48 - p / 600 * 288;
+    const points = delta.map((p, i) => `${x(i)},${y(p)}`);
+    document.getElementById('curve-drawing').innerHTML = `
+      <text x="0" y="20" fill="var(--muted)" font-size="28">累计盈亏</text>
+      ${[0, -200, -400, -600].map(p => `<line x1="148" y1="${y(p)}" x2="1644" y2="${y(p)}" stroke="var(--line)"/><text x="120" y="${y(p) + 9}" text-anchor="end" fill="var(--muted)" font-size="28">${p}</text>`).join('')}
+      <polygon points="148,48 ${points.join(' ')} 1644,48" fill="#2b2037"/>
+      <line x1="148" y1="48" x2="1644" y2="48" stroke="var(--green)" stroke-width="2" stroke-dasharray="14 8"/>
+      <text x="1644" y="12" text-anchor="end" fill="var(--green)" font-size="28">零线：达到基准平均水平</text>
+      <polyline points="${points.join(' ')}" fill="none" stroke="var(--purple)" stroke-width="4"/>
+      ${delta.map((p, i) => `${nodeIcon(baseline[i], x(i), y(p), 'var(--purple)')}<text x="${x(i)}" y="388" text-anchor="middle" fill="var(--muted)" font-size="29">${i + 1}</text>`).join('')}`;
+
+    const mx = i => 148 + i * 1496 / 9;
+    const my = p => 300 - p / 600 * 240;
+    const manaPoints = manaDelta.map((p, i) => `${mx(i)},${my(p)}`);
+    document.getElementById('mana-curve-drawing').innerHTML = `
+      <text x="0" y="20" fill="var(--muted)" font-size="28">累计ΔP（相对基线Q）</text>
+      ${[0, 200, 400, 600].map(p => `<line x1="148" y1="${my(p)}" x2="1644" y2="${my(p)}" stroke="var(--line)"/><text x="120" y="${my(p) + 9}" text-anchor="end" fill="var(--muted)" font-size="28">${p}</text>`).join('')}
+      <polygon points="148,300 ${manaPoints.join(' ')} 1644,300" fill="#12372e"/>
+      <line x1="148" y1="300" x2="1644" y2="300" stroke="var(--green)" stroke-width="2" stroke-dasharray="14 8"/>
+      <text x="1644" y="282" text-anchor="end" fill="var(--muted)" font-size="26">零线</text>
+      <polyline points="${manaPoints.join(' ')}" fill="none" stroke="var(--green)" stroke-width="4"/>
+      ${manaDelta.map((p, i) => `${nodeIcon(manaNodes[i], mx(i), my(p), i === 0 ? 'var(--orange)' : 'var(--green)')}<text x="${mx(i)}" y="388" text-anchor="middle" fill="var(--muted)" font-size="29">${i}</text>`).join('')}
+      ${[7, 8].map(i => `<text x="${mx(i) - 42}" y="${my(manaDelta[i]) - 42}" text-anchor="end" fill="var(--green)" font-size="30" font-weight="700">${i}G +${manaDelta[i].toFixed(2)}</text>`).join('')}
+      <text x="1644" y="30" text-anchor="end" fill="var(--green)" font-size="32" font-weight="700">9G +${manaGain.toFixed(2)}</text>`;
+
+    const scenes = [...document.querySelectorAll('.scene')];
+    const pageLinks = [...document.querySelectorAll('.controls a')];
+    let current = 0;
+    function showPage() {
+      current = /^[1-4]$/.test(location.hash.slice(1)) ? Number(location.hash.slice(1)) - 1 : 0;
+      scenes.forEach((scene, i) => { scene.hidden = i !== current; });
+      pageLinks.forEach((link, i) => { if (i === current) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current'); });
+    }
+    function fitCanvas() {
+      const scale = Math.min((innerWidth - 32) / 1920, (innerHeight - 90) / 1080);
+      document.documentElement.style.setProperty('--scale', scale);
+    }
+    addEventListener('hashchange', showPage);
+    addEventListener('resize', fitCanvas);
+    addEventListener('keydown', event => {
+      if (['ArrowRight', 'ArrowLeft', ' '].includes(event.key)) {
+        event.preventDefault();
+        const next = current + (event.key === 'ArrowLeft' ? -1 : 1);
+        location.hash = String(Math.max(0, Math.min(scenes.length - 1, next)) + 1);
+      }
+    });
+    showPage();
+    fitCanvas();
+  </script>
+</body>
+</html>
