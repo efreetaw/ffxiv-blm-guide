@@ -39,14 +39,12 @@
     .panel { border: 1px solid var(--line); border-radius: 26px; background: var(--panel); }
 
     /* 第1节画面样式。 */
-    #chapter-1 .masthead, #chapter-1 .footer { position: absolute; left: 96px; right: 96px; display: flex; justify-content: space-between; color: var(--muted); }
+    #chapter-1 .masthead { position: absolute; left: 96px; right: 96px; display: flex; justify-content: space-between; color: var(--muted); }
     #chapter-1 .masthead { top: 56px; height: 63px; align-items: flex-start; justify-content: flex-end; border-bottom: 1px solid var(--line); font-size: 28px; }
-    #chapter-1 .footer { bottom: 30px; height: 60px; align-items: flex-end; border-top: 1px solid var(--line); font-size: 24px; }
-    #chapter-1 #page-number { font-size: 30px; }
     #chapter-1 h1, #chapter-1 h2, #chapter-1 p { margin: 0; }
     #chapter-1 .title { position: absolute; top: 146px; left: 96px; right: 96px; font-size: 72px; line-height: 1.25; font-weight: 700; }
     #chapter-1 .icon { flex: none; width: 82px; height: 82px; border: 1px solid var(--line); border-radius: 9px; }
-    #chapter-1 .damage-band { position: absolute; top: 318px; left: 96px; right: 96px; height: 148px; padding: 28px 32px; display: flex; align-items: center; gap: 32px; }
+    #chapter-1 .damage-band { position: absolute; top: 254px; left: 96px; right: 96px; height: 148px; padding: 28px 32px; display: flex; align-items: center; gap: 32px; }
     #chapter-1 .damage-skill { flex: none; display: flex; align-items: center; gap: 24px; color: var(--purple); font-size: 40px; font-weight: 700; }
     #chapter-1 .damage-skill small { display: block; margin-top: 8px; color: var(--muted); font-size: 25px; font-weight: 400; }
     #chapter-1 .damage-track { flex: 1; height: 64px; display: flex; border-radius: 13px; overflow: hidden; background: var(--purple); }
@@ -55,10 +53,10 @@
     #chapter-1 .bar-total { flex: none; width: 172px; text-align: right; }
     #chapter-1 .bar-total strong { font-size: 48px; }
     #chapter-1 .bar-total span { display: block; margin-top: 8px; color: var(--muted); font-size: 26px; }
-    #chapter-1 .potency-chart { position: absolute; left: 96px; top: 480px; width: 1728px; height: 390px; overflow: visible; }
+    #chapter-1 .potency-chart { position: absolute; left: 96px; top: 416px; width: 1728px; height: 390px; overflow: visible; }
     #chapter-1 .potency-chart text { font-family: inherit; }
-    #chapter-1 .conditions { position: absolute; bottom: 132px; left: 96px; right: 96px; height: 68px; display: grid; place-content: center; font-size: 30px; color: var(--muted); }
-    #chapter-1 .comparison { position: absolute; top: 334px; left: 96px; right: 96px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+    #chapter-1 .conditions { position: absolute; bottom: 196px; left: 96px; right: 96px; height: 68px; display: grid; place-content: center; font-size: 30px; color: var(--muted); }
+    #chapter-1 .comparison { position: absolute; top: 270px; left: 96px; right: 96px; display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
     #chapter-1 .compare-card { height: 534px; position: relative; padding: 32px 42px; border-width: 2px; }
     #chapter-1 .loss { color: var(--pink); background: #2e2030; }
     #chapter-1 .gain { color: var(--green); background: #16372f; }
@@ -80,7 +78,7 @@
     #chapter-1 .mini-gcd li { width: 73px; height: 49px; display: grid; place-content: center; border: 1px solid var(--line); border-radius: 10px; background: #1a2738; color: var(--muted); font-size: 29px; }
     #chapter-1 .mini-gcd li:first-child { color: var(--purple); border-color: var(--purple); font-size: 23px; }
     #chapter-1 .mini-gcd li:last-child { color: inherit; border-color: currentColor; }
-    #chapter-1 .counting-note { position: absolute; bottom: 128px; left: 96px; right: 96px; text-align: center; font-size: 32px; color: var(--muted); }
+    #chapter-1 .counting-note { position: absolute; bottom: 192px; left: 96px; right: 96px; text-align: center; font-size: 32px; color: var(--muted); }
 
 
     /* 第2节画面样式。 */
@@ -97,24 +95,24 @@
     #chapter-2 .skill-index { font-size: 28px; color: var(--muted); }
     #chapter-2 .skill-card img { width: 58px; height: 58px; border: 1px solid var(--line); border-radius: 8px; }
     #chapter-2 .skill-card strong { font-size: 28px; white-space: nowrap; }
-    #chapter-2 .cycle-badge { position: absolute; top: 332px; left: 96px; padding: 10px 36px; border-radius: 40px; background: #202a3d; color: var(--purple); font-size: 36px; font-weight: 700; }
-    #chapter-2 .cycle-note { position: absolute; top: 348px; right: 96px; color: var(--muted); font-size: 28px; }
-    #chapter-2 .cutoff-row { position: absolute; top: 510px; left: 116px; right: 152px; }
+    #chapter-2 .cycle-badge { position: absolute; top: 268px; left: 96px; padding: 10px 36px; border-radius: 40px; background: #202a3d; color: var(--purple); font-size: 36px; font-weight: 700; }
+    #chapter-2 .cycle-note { position: absolute; top: 284px; right: 96px; color: var(--muted); font-size: 28px; }
+    #chapter-2 .cutoff-row { position: absolute; top: 446px; left: 116px; right: 152px; }
     #chapter-2 .cutoff-row .skill-card:nth-child(n+5) { opacity: .28; }
     #chapter-2 .cutoff-marker { position: absolute; left: 506px; top: -28px; height: 296px; border-left: 3px dashed var(--pink); }
     #chapter-2 .cutoff-marker span { position: absolute; top: -65px; left: -116px; width: 230px; padding: 10px 0; text-align: center; border-radius: 40px; background: #392336; color: var(--pink); font-size: 32px; font-weight: 700; }
-    #chapter-2 .range-lines { position: absolute; top: 744px; left: 116px; right: 152px; display: flex; gap: 28px; text-align: center; font-size: 32px; }
+    #chapter-2 .range-lines { position: absolute; top: 680px; left: 116px; right: 152px; display: flex; gap: 28px; text-align: center; font-size: 32px; }
     #chapter-2 .range-lines span { padding-top: 12px; border-top: 3px solid currentColor; }
     #chapter-2 .done-range { width: 494px; color: var(--purple); font-weight: 700; }
     #chapter-2 .remaining-range { flex: 1; color: #788aa7; }
-    #chapter-2 .formula { position: absolute; top: 327px; left: 96px; right: 96px; height: 154px; padding: 16px 36px; }
+    #chapter-2 .formula { position: absolute; top: 263px; left: 96px; right: 96px; height: 154px; padding: 16px 36px; }
     #chapter-2 .formula h2 { color: var(--purple); font-size: 52px; }
     #chapter-2 .formula p { margin-top: 15px; font-size: 38px; }
     #chapter-2 .formula-label { position: absolute; top: 34px; right: 36px; color: var(--muted); font-size: 32px; }
-    #chapter-2 .curve { position: absolute; top: 518px; left: 96px; width: 1728px; height: 400px; overflow: visible; }
+    #chapter-2 .curve { position: absolute; top: 454px; left: 96px; width: 1728px; height: 400px; overflow: visible; }
     #chapter-2 .curve text { font-family: inherit; }
-    #chapter-2 .curve-caption { position: absolute; top: 934px; left: 96px; right: 96px; text-align: center; color: var(--muted); font-size: 30px; }
-    #chapter-2 .mana-intro { position: absolute; top: 327px; left: 96px; right: 96px; height: 154px; padding: 24px 36px; display: flex; align-items: center; gap: 40px; }
+    #chapter-2 .curve-caption { position: absolute; top: 870px; left: 96px; right: 96px; text-align: center; color: var(--muted); font-size: 30px; }
+    #chapter-2 .mana-intro { position: absolute; top: 263px; left: 96px; right: 96px; height: 154px; padding: 24px 36px; display: flex; align-items: center; gap: 40px; }
     #chapter-2 .mana-trigger { flex: none; display: flex; align-items: center; gap: 20px; }
     #chapter-2 .mana-trigger img { width: 72px; height: 72px; border-radius: 9px; }
     #chapter-2 .mana-trigger strong { display: block; color: var(--purple); font-size: 38px; }
@@ -144,7 +142,7 @@
     #chapter-3 .skill-card.faded { opacity: .22; }
     #chapter-3 .skill-card.empty { border: 1px dashed var(--line); background: transparent; }
     #chapter-3 .shift { position: absolute; top: -44px; left: -54px; z-index: 1; width: 108px; padding: 5px 0; border: 1px solid #536080; border-radius: 8px; background: #20263b; color: var(--muted); font-size: 20px; text-align: center; }
-    #chapter-3 .opening { position: absolute; top: 340px; left: 96px; right: 96px; }
+    #chapter-3 .opening { position: absolute; top: 276px; left: 96px; right: 96px; }
     #chapter-3 .opening-block + .opening-block { margin-top: 40px; }
     #chapter-3 .row-heading { height: 40px; display: flex; align-items: center; gap: 24px; font-size: 34px; }
     #chapter-3 .row-heading span { color: var(--muted); font-size: 26px; }
@@ -316,7 +314,6 @@
 
       </div>
 
-      <footer class="footer"><span>黑魔法师 · 限定时间内的技能选择</span><span id="page-number">01 / 02</span></footer>
       </section>
       <section class="chapter" id="chapter-2" aria-label="第二节" hidden>
       <header class="masthead"><span>第二节 / 基准循环截断的亏损</span></header>
@@ -332,7 +329,6 @@
           <h1 class="title">截断循环的亏损曲线</h1>
           <div class="formula panel"><h2>Q = <span id="baseline-total"></span> ÷ 13 ≈ <span id="q-value"></span></h2><span class="formula-label">每格平均威力</span><p>累计盈亏 = 已打出的威力 − 已完成GCD数 × Q</p></div>
           <svg class="curve" viewBox="0 0 1728 400" role="img" aria-labelledby="curve-title curve-description"><title id="curve-title">基准循环累计ΔP</title><desc id="curve-description">前12格均为负收益，第4格最低为负570.46，第12格为负103.38，第13格归零。</desc><g id="curve-drawing"></g></svg>
-          <p class="curve-caption">已完成的GCD数 · 低于零线，代表低于基准平均水平</p>
         </section>
 
         <section class="scene" aria-label="03 魔泉启动常规火段" hidden>
@@ -401,10 +397,10 @@
         <section class="scene thunder-page" aria-label="07 截断雷" hidden>
           <h1 class="title">截断雷的盈亏</h1>
           <div class="gcd-buttons" id="thunder-buttons" aria-label="选择被新雷覆盖的旧雷跳数"></div>
-          <div class="thunder-row first"><h2>补雷：<span class="purple">7核心G</span> + 4异言 + 1雷</h2><div id="thunder-with"></div></div>
-          <div class="thunder-row second"><h2>不补雷：<span class="green">8核心G</span> + 4异言</h2><div id="thunder-without"></div></div>
+          <div class="thunder-row first"><h2>补雷：1雷 + 3异言 + <span class="purple">8G B4特化</span> = 12G</h2><div id="thunder-with"></div></div>
+          <div class="thunder-row second"><h2>不补雷：3异言 + <span class="green">9G B4特化</span> = 12G</h2><div id="thunder-without"></div></div>
           <div class="thunder-result panel" id="thunder-result"></div>
-          <p class="thunder-note">双方进火≥3200MP；补雷少打一发U（540威力）。第4发异言需通晓回转。</p>
+          <p class="thunder-note">共同起点：星灵移位进冰 · 两组均12G（29.40s），咏速787 · 双方进火≥3200MP · 补雷少打末尾U（540威力）</p>
         </section>
       </div>
       </section>
@@ -739,18 +735,18 @@
         document.getElementById('compare-execute').innerHTML = skillCards(route.keys);
       }
 
-      const thunderWithout = [...routes[8].keys.slice(0, 2), 'xeno', 'xeno', ...routes[8].keys.slice(2), 'xeno', 'xeno'];
-      const thunderWith = thunderWithout.map((key, i) => i === 1 ? 'thunder' : key);
+      const thunderWithout = [...Array(3).fill('xeno'), ...routes[9].keys];
+      const thunderWith = ['thunder', ...Array(3).fill('xeno'), ...routes[8].keys];
       const thunderWindow = (thunderWith.length - thunderWith.indexOf('thunder')) * gcdSeconds;
       const thunderExpected = expectedThunder(thunderWindow);
-      const thunderCoreCost = potency(routes[8].keys) - potency(thunderWith.filter(key => !['thunder', 'xeno'].includes(key)));
+      const thunderCoreCost = potency(routes[9].keys) - potency(routes[8].keys);
       document.getElementById('thunder-with').innerHTML = skillCards(thunderWith);
       document.getElementById('thunder-without').innerHTML = skillCards(thunderWithout);
       function renderThunder(oldTicks) {
         selectChoice('thunder-buttons', oldTicks);
         const loss = oldTicks * 61.02;
         const net = thunderExpected - loss - thunderCoreCost;
-        document.getElementById('thunder-result').innerHTML = `<div class="thunder-term"><h3>新雷期望威力</h3><strong>${thunderExpected.toFixed(2)}</strong></div><span class="operator">−</span><div class="thunder-term"><h3>覆盖旧雷损失</h3><strong>${loss.toFixed(2)}</strong></div><span class="operator">−</span><div class="thunder-term"><h3>核心少打威力</h3><strong>${thunderCoreCost}</strong></div><span class="operator">=</span><div class="thunder-term"><h3>补雷方案期望差额</h3><strong class="${tone(net)}">${signed(net)}</strong></div>`;
+        document.getElementById('thunder-result').innerHTML = `<div class="thunder-term"><h3>新雷期望威力</h3><strong>${thunderExpected.toFixed(2)}</strong></div><span class="operator">−</span><div class="thunder-term"><h3>覆盖旧雷损失</h3><strong>${loss.toFixed(2)}</strong></div><span class="operator">−</span><div class="thunder-term"><h3>少打末尾U</h3><strong>${thunderCoreCost}</strong></div><span class="operator">=</span><div class="thunder-term"><h3>补雷方案期望差额</h3><strong class="${tone(net)}">${signed(net)}</strong></div>`;
       }
 
       choices('short-buttons', [1, 2, 3, 4, 5], n => renderRoute('short', n));
@@ -795,7 +791,6 @@
         if (link.hash === hash) link.setAttribute('aria-current', 'page');
         else link.removeAttribute('aria-current');
       });
-      document.getElementById('page-number').textContent = `${String(currentPage + 1).padStart(2, '0')} / 02`;
       document.title = `${scenes[currentChapter][currentPage].querySelector('h1').textContent} · 不定GCD下的斩杀特化`;
       fitCanvas();
     }
